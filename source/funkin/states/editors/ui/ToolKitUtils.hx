@@ -203,8 +203,8 @@ class ToolKitUtils
 	{
 		// some duct tape
 		// to make using haxe ui more stable
-		
-		if (FlxG.mouse.justMoved || FlxG.mouse.justPressed || FlxG.mouse.justReleased)
+		@:privateAccess
+		if (FlxG.game._nextState == null && (FlxG.mouse.justMoved || FlxG.mouse.justPressed || FlxG.mouse.justReleased))
 		{
 			iterated.resize(0);
 			currentFocus = null;
@@ -229,7 +229,9 @@ class ToolKitUtils
 			
 			if (!component.hasComponentUnderPoint(_hitTest.x, _hitTest.y))
 			{
-				(cast component : InteractiveComponent).focus = false;
+				var component:InteractiveComponent = cast component;
+				@:privateAccess component._focus = true;
+				component.focus = false;
 				return;
 			}
 		}
@@ -254,6 +256,15 @@ class ToolKitUtils
 		}
 		@:privateAccess if (component._children != null) for (child in component._children)
 			focusIter(child);
+	}
+	
+	public static function changeSilent(component:InteractiveComponent, value:Dynamic):Dynamic
+	{
+		component.pauseEvent('change'); // thakn u data this keeps me sane
+		component.value = value;
+		component.resumeEvent('change', true);
+		
+		return value;
 	}
 }
 

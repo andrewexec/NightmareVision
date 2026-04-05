@@ -43,7 +43,7 @@ import funkin.backend.Difficulty;
 import funkin.data.Song;
 import funkin.states.substates.Prompt;
 import funkin.backend.Conductor.BPMChangeEvent;
-import funkin.data.Song.SwagSong;
+import funkin.data.Song;
 import funkin.scripts.*;
 import funkin.states.*;
 import funkin.objects.*;
@@ -51,7 +51,6 @@ import funkin.objects.note.*;
 import funkin.states.editors.ui.*;
 import funkin.backend.MusicBeatSubstate;
 import funkin.states.editors.ui.ChartEditorKit;
-
 import funkin.audio.SyncedFlxSoundGroup;
 
 #if sys
@@ -277,7 +276,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	var curUndoIndex = 0;
 	var curRedoIndex = 0;
 	
-	public static var _song:SwagSong;
+	public static var song:Song = null;
 	
 	/*
 	 * WILL BE THE CURRENT / LAST PLACED NOTE
@@ -342,34 +341,16 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		super.create();
 		
 		instance = this;
-		if (PlayState.SONG != null) _song = PlayState.SONG;
-		else
+		
+		if (song == null)
 		{
 			Difficulty.reset();
 			
-			_song =
-				{
-					song: 'test',
-					trackSwap: false,
-					notes: [],
-					events: [],
-					bpm: 100.0,
-					needsVoices: true,
-					arrowSkins: ['default', 'default'],
-					// arrowSkin: 'default',
-					// splashSkin: 'default',
-					player1: 'bf',
-					player2: 'bf',
-					gfVersion: 'gf',
-					speed: 1,
-					stage: 'stage',
-					keys: 4,
-					lanes: 2
-				};
+			song = getDefaultSong();
 			addSection();
-			PlayState.SONG = _song;
 		}
-		initialKeyCount = _song.keys;
+		
+		initialKeyCount = song.keys;
 		ClientPrefs.load();
 		
 		FlxG.sound.music?.stop();
@@ -378,11 +359,11 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		
 		// if (PlayState.noteSkin != null)
 		// {
-		// 	NoteSkinHelper.keys = _song.keys;
+		// 	NoteSkinHelper.keys = song.keys;
 		// }
 		
 		// Updating Discord Rich Presence
-		// DiscordClient.changePresence("Chart Editor", StringTools.replace(_song.song, '-', ' '));
+		// DiscordClient.changePresence("Chart Editor", StringTools.replace(song.song, '-', ' '));
 		DiscordClient.changePresence("Chart Editor", "Uhm idk mane burp");
 		
 		FlxG.cameras.reset();
@@ -412,9 +393,9 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		waveformSprite.antialiasing = false;
 		add(waveformSprite);
 		
-		bfIcon = CharacterParser.fetchInfo(_song.player1).healthicon;
-		dadIcon = CharacterParser.fetchInfo(_song.player2).healthicon;
-		gfIcon = CharacterParser.fetchInfo(_song.gfVersion).healthicon;
+		bfIcon = CharacterParser.fetchInfo(song.player1).healthicon;
+		dadIcon = CharacterParser.fetchInfo(song.player2).healthicon;
+		gfIcon = CharacterParser.fetchInfo(song.gfVersion).healthicon;
 		
 		// var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -90).loadGraphic(Paths.image('eventArrow'));
 		leftIcon = new HealthIcon(bfIcon);
@@ -438,20 +419,20 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		nextRenderedSustains = new FlxTypedGroup<FlxSprite>();
 		nextRenderedNotes = new FlxTypedGroup<Note>();
 		
-		if (curSec >= _song.notes.length) curSec = _song.notes.length - 1;
+		if (curSec >= song.notes.length) curSec = song.notes.length - 1;
 		
 		FlxG.mouse.visible = true;
 		
-		tempBpm = _song.bpm;
+		tempBpm = song.bpm;
 		
 		addSection();
 		
-		currentSongName = Paths.sanitize(_song.song);
+		currentSongName = Paths.sanitize(song.song);
 		loadSong();
 		reloadGradient();
 		reloadGridLayer();
-		Conductor.bpm = _song.bpm;
-		Conductor.mapBPMChanges(_song);
+		Conductor.bpm = song.bpm;
+		Conductor.mapBPMChanges(song);
 		
 		gridZoom(true);
 		
@@ -460,7 +441,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		bpmTxt.camera = camHUD;
 		add(bpmTxt);
 		
-		strumLine = new FlxSprite(0, 50).makeGraphic(Std.int(GRID_SIZE * ((_song.keys * _song.lanes) + 1)), 4);
+		strumLine = new FlxSprite(0, 50).makeGraphic(Std.int(GRID_SIZE * ((song.keys * song.lanes) + 1)), 4);
 		add(strumLine);
 		
 		quant = new AttachedSprite('editors/chart_quant', 'chart_quant');
@@ -544,6 +525,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		// add(clickForInfo);
 		
 		selectionBox = new DebugBounds();
+		selectionBox.negativeSize = true;
 		selectionBox.bgAlpha = .5;
 		selectionBox.kill();
 		add(selectionBox);
@@ -555,6 +537,33 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		lastSong = currentSongName;
 		
 		updateGrid();
+	}
+	
+	public static function getDefaultSong():Song
+	{
+		return {
+			song: 'test',
+			trackSwap: false,
+			notes: [],
+			events: [],
+			bpm: 150,
+			needsVoices: true,
+			arrowSkins: ['default', 'default'],
+			player1: 'bf',
+			player2: 'dad',
+			gfVersion: 'gf',
+			speed: 1,
+			stage: 'stage',
+			keys: 4,
+			lanes: 2
+		};
+	}
+	
+	public override function destroy():Void
+	{
+		FlxG.mouse.visible = false;
+		
+		super.destroy();
 	}
 	
 	public function buildUI():Void
@@ -628,156 +637,155 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	var dadHitsound:Bool = false;
 	
 	/*
-	function addVisualsUI():Void
-	{
-		var tab_group_visual = new FlxUI(null, UI_box);
-		tab_group_visual.name = 'Visuals';
-		
-		var gradTxt = new FlxText(10, 10, 0, "Gradient Colors", 12);
-		
-		var gradient1colors = new FlxUIInputTextEx(10, 30, 150, '${ClientPrefs.editorGradColors[0].red}, ${ClientPrefs.editorGradColors[0].green}, ${ClientPrefs.editorGradColors[0].blue}', 8);
-		var gradient2colors = new FlxUIInputTextEx(10, 50, 150, '${ClientPrefs.editorGradColors[1].red}, ${ClientPrefs.editorGradColors[1].green}, ${ClientPrefs.editorGradColors[1].blue}', 8);
-		
-		var changecolors:FlxButton = new FlxButton(180, 37.5, "Change colors", function() {
-			var grad1Colors:Array<Int> = [for (i in gradient1colors.text.split(',')) Std.parseInt(i.trim())];
-			var grad2Colors:Array<Int> = [for (i in gradient2colors.text.split(',')) Std.parseInt(i.trim())];
+		function addVisualsUI():Void
+		{
+			var tab_group_visual = new FlxUI(null, UI_box);
+			tab_group_visual.name = 'Visuals';
 			
-			ClientPrefs.editorGradColors[0] = FlxColor.fromRGB(grad1Colors[0], grad1Colors[1], grad1Colors[2]);
-			ClientPrefs.editorGradColors[1] = FlxColor.fromRGB(grad2Colors[0], grad2Colors[1], grad2Colors[2]);
-			ClientPrefs.flush();
+			var gradTxt = new FlxText(10, 10, 0, "Gradient Colors", 12);
 			
-			reloadGradient();
-		});
-		
-		check_grad_vis = new FlxUICheckBox(10, 75, null, null, "Gradient Visible?", 100);
-		check_grad_vis.checked = gradient.alive;
-		
-		check_grad_vis.callback = function() {
-			ClientPrefs.editorGradVis = (!ClientPrefs.editorGradVis);
-			ClientPrefs.flush();
+			var gradient1colors = new FlxUIInputTextEx(10, 30, 150, '${ClientPrefs.editorGradColors[0].red}, ${ClientPrefs.editorGradColors[0].green}, ${ClientPrefs.editorGradColors[0].blue}', 8);
+			var gradient2colors = new FlxUIInputTextEx(10, 50, 150, '${ClientPrefs.editorGradColors[1].red}, ${ClientPrefs.editorGradColors[1].green}, ${ClientPrefs.editorGradColors[1].blue}', 8);
 			
-			reloadGradient();
-		}
-		
-		tab_group_visual.add(gradTxt);
-		tab_group_visual.add(gradient1colors);
-		tab_group_visual.add(gradient2colors);
-		tab_group_visual.add(changecolors);
-		tab_group_visual.add(check_grad_vis);
-		
-		var boxTxt = new FlxText(10, 95, 0, "Grid Colors", 12);
-		
-		var boxTxtColors1 = new FlxUIInputTextEx(10, 115, 150, '${ClientPrefs.editorBoxColors[0].red}, ${ClientPrefs.editorBoxColors[0].green}, ${ClientPrefs.editorBoxColors[0].blue}', 8);
-		var boxTxtColors2 = new FlxUIInputTextEx(10, 135, 150, '${ClientPrefs.editorBoxColors[1].red}, ${ClientPrefs.editorBoxColors[1].green}, ${ClientPrefs.editorBoxColors[1].blue}', 8);
-		
-		var changecolors:FlxButton = new FlxButton(180, 125, "Change colors", function() {
-			box1Colors = [];
-			box2Colors = [];
-			// gradient.y = 0;
+			var changecolors:FlxButton = new FlxButton(180, 37.5, "Change colors", function() {
+				var grad1Colors:Array<Int> = [for (i in gradient1colors.text.split(',')) Std.parseInt(i.trim())];
+				var grad2Colors:Array<Int> = [for (i in gradient2colors.text.split(',')) Std.parseInt(i.trim())];
+				
+				ClientPrefs.editorGradColors[0] = FlxColor.fromRGB(grad1Colors[0], grad1Colors[1], grad1Colors[2]);
+				ClientPrefs.editorGradColors[1] = FlxColor.fromRGB(grad2Colors[0], grad2Colors[1], grad2Colors[2]);
+				ClientPrefs.flush();
+				
+				reloadGradient();
+			});
 			
-			for (i in boxTxtColors1.text.split(', '))
-			{
-				box1Colors.push(Std.parseInt(i));
-			}
-			for (i in boxTxtColors2.text.split(', '))
-			{
-				box2Colors.push(Std.parseInt(i));
-			}
-			
-			ClientPrefs.editorBoxColors[0] = FlxColor.fromRGB(box1Colors[0], box1Colors[1], box1Colors[2]);
-			ClientPrefs.editorBoxColors[1] = FlxColor.fromRGB(box2Colors[0], box2Colors[1], box2Colors[2]);
-			ClientPrefs.flush();
-			
-			reloadGridLayer();
-		});
-		
-		tab_group_visual.add(boxTxt);
-		tab_group_visual.add(boxTxtColors1);
-		tab_group_visual.add(boxTxtColors2);
-		tab_group_visual.add(changecolors);
-		
-		var uiTxt = new FlxText(10, 155, 0, "UI Colors", 12);
-		
-		var uiBoxTxt = new FlxUIInputTextEx(10, 175, 150, '${ClientPrefs.editorUIColor.red}, ${ClientPrefs.editorUIColor.green}, ${ClientPrefs.editorUIColor.blue}', 8);
-		
-		var changecolors:FlxButton = new FlxButton(180, 170, "Change Color", function() {
-			var shit = uiBoxTxt.text.split(', ');
-			
-			ClientPrefs.editorUIColor = FlxColor.fromRGB(Std.parseInt(shit[0]), Std.parseInt(shit[1]), Std.parseInt(shit[2]));
-			ClientPrefs.flush();
-			
-			UI_box.color = ClientPrefs.editorUIColor;
-			reloadGridLayer();
-		});
-		
-		var prsTxt = new FlxText(10, 200, 0, "Presets", 12);
-		
-		var prsNm = new FlxText(10, 230, 0, "New Preset Name", 6);
-		var newPrsName = new FlxUIInputTextEx(10, 240, 150, '', 8);
-		
-		var lPrs = new FlxText(10, 260, 0, "Load Preset", 6);
-		var prsList = new FlxUIDropDownMenuEx(10, 270, FlxUIDropDownMenu.makeStrIdLabelArray(ClientPrefs.chartPresetList), function(preset:String) {
-			var presetToUse = ClientPrefs.chartPresets.get(preset);
-			ClientPrefs.editorGradColors = presetToUse[0];
-			ClientPrefs.editorGradVis = presetToUse[1];
-			ClientPrefs.editorBoxColors = presetToUse[2];
-			ClientPrefs.editorUIColor = presetToUse[3];
-			ClientPrefs.flush();
-			
-			reloadGradient();
+			check_grad_vis = new FlxUICheckBox(10, 75, null, null, "Gradient Visible?", 100);
 			check_grad_vis.checked = gradient.alive;
-			UI_box.color = ClientPrefs.editorUIColor;
-			reloadGridLayer();
-		});
-		
-		var newPrsButton = new FlxButton((newPrsName.x + newPrsName.width) + 10, 240, "New Preset", function() {
-			if (!ClientPrefs.chartPresets.exists(newPrsName.text)) ClientPrefs.chartPresetList.push(newPrsName.text);
-			ClientPrefs.chartPresets.set(newPrsName.text, [
-				[ClientPrefs.editorGradColors[0], ClientPrefs.editorGradColors[1]],
-				false,
-				[ClientPrefs.editorBoxColors[0], ClientPrefs.editorBoxColors[1]],
-				ClientPrefs.editorUIColor
-			]);
-			ClientPrefs.flush();
 			
-			prsList.setData(FlxUIDropDownMenu.makeStrIdLabelArray(ClientPrefs.chartPresetList));
+			check_grad_vis.callback = function() {
+				ClientPrefs.editorGradVis = (!ClientPrefs.editorGradVis);
+				ClientPrefs.flush();
+				
+				reloadGradient();
+			}
 			
-			trace('New Preset! [${newPrsName.text}]\nValue: ${ClientPrefs.chartPresets.get(newPrsName.text)}');
-		});
-		
-		var clearPresets = new FlxButton((prsList.x + prsList.width) + 10, 270, "Clear Presets", function() {
-			openSubState(new Prompt('This action will clear all presets.\n\nProceed?', 0, function() {
-				ClientPrefs.chartPresets.clear();
-				ClientPrefs.chartPresetList = ['Default'];
-				ClientPrefs.chartPresets.set('Default', [
-					[FlxColor.fromRGB(0, 0, 0), FlxColor.fromRGB(0, 0, 0)],
+			tab_group_visual.add(gradTxt);
+			tab_group_visual.add(gradient1colors);
+			tab_group_visual.add(gradient2colors);
+			tab_group_visual.add(changecolors);
+			tab_group_visual.add(check_grad_vis);
+			
+			var boxTxt = new FlxText(10, 95, 0, "Grid Colors", 12);
+			
+			var boxTxtColors1 = new FlxUIInputTextEx(10, 115, 150, '${ClientPrefs.editorBoxColors[0].red}, ${ClientPrefs.editorBoxColors[0].green}, ${ClientPrefs.editorBoxColors[0].blue}', 8);
+			var boxTxtColors2 = new FlxUIInputTextEx(10, 135, 150, '${ClientPrefs.editorBoxColors[1].red}, ${ClientPrefs.editorBoxColors[1].green}, ${ClientPrefs.editorBoxColors[1].blue}', 8);
+			
+			var changecolors:FlxButton = new FlxButton(180, 125, "Change colors", function() {
+				box1Colors = [];
+				box2Colors = [];
+				// gradient.y = 0;
+				
+				for (i in boxTxtColors1.text.split(', '))
+				{
+					box1Colors.push(Std.parseInt(i));
+				}
+				for (i in boxTxtColors2.text.split(', '))
+				{
+					box2Colors.push(Std.parseInt(i));
+				}
+				
+				ClientPrefs.editorBoxColors[0] = FlxColor.fromRGB(box1Colors[0], box1Colors[1], box1Colors[2]);
+				ClientPrefs.editorBoxColors[1] = FlxColor.fromRGB(box2Colors[0], box2Colors[1], box2Colors[2]);
+				ClientPrefs.flush();
+				
+				reloadGridLayer();
+			});
+			
+			tab_group_visual.add(boxTxt);
+			tab_group_visual.add(boxTxtColors1);
+			tab_group_visual.add(boxTxtColors2);
+			tab_group_visual.add(changecolors);
+			
+			var uiTxt = new FlxText(10, 155, 0, "UI Colors", 12);
+			
+			var uiBoxTxt = new FlxUIInputTextEx(10, 175, 150, '${ClientPrefs.editorUIColor.red}, ${ClientPrefs.editorUIColor.green}, ${ClientPrefs.editorUIColor.blue}', 8);
+			
+			var changecolors:FlxButton = new FlxButton(180, 170, "Change Color", function() {
+				var shit = uiBoxTxt.text.split(', ');
+				
+				ClientPrefs.editorUIColor = FlxColor.fromRGB(Std.parseInt(shit[0]), Std.parseInt(shit[1]), Std.parseInt(shit[2]));
+				ClientPrefs.flush();
+				
+				UI_box.color = ClientPrefs.editorUIColor;
+				reloadGridLayer();
+			});
+			
+			var prsTxt = new FlxText(10, 200, 0, "Presets", 12);
+			
+			var prsNm = new FlxText(10, 230, 0, "New Preset Name", 6);
+			var newPrsName = new FlxUIInputTextEx(10, 240, 150, '', 8);
+			
+			var lPrs = new FlxText(10, 260, 0, "Load Preset", 6);
+			var prsList = new FlxUIDropDownMenuEx(10, 270, FlxUIDropDownMenu.makeStrIdLabelArray(ClientPrefs.chartPresetList), function(preset:String) {
+				var presetToUse = ClientPrefs.chartPresets.get(preset);
+				ClientPrefs.editorGradColors = presetToUse[0];
+				ClientPrefs.editorGradVis = presetToUse[1];
+				ClientPrefs.editorBoxColors = presetToUse[2];
+				ClientPrefs.editorUIColor = presetToUse[3];
+				ClientPrefs.flush();
+				
+				reloadGradient();
+				check_grad_vis.checked = gradient.alive;
+				UI_box.color = ClientPrefs.editorUIColor;
+				reloadGridLayer();
+			});
+			
+			var newPrsButton = new FlxButton((newPrsName.x + newPrsName.width) + 10, 240, "New Preset", function() {
+				if (!ClientPrefs.chartPresets.exists(newPrsName.text)) ClientPrefs.chartPresetList.push(newPrsName.text);
+				ClientPrefs.chartPresets.set(newPrsName.text, [
+					[ClientPrefs.editorGradColors[0], ClientPrefs.editorGradColors[1]],
 					false,
-					[FlxColor.fromRGB(255, 255, 255), FlxColor.fromRGB(210, 210, 210)],
-					FlxColor.fromRGB(250, 250, 250)
+					[ClientPrefs.editorBoxColors[0], ClientPrefs.editorBoxColors[1]],
+					ClientPrefs.editorUIColor
 				]);
 				ClientPrefs.flush();
 				
 				prsList.setData(FlxUIDropDownMenu.makeStrIdLabelArray(ClientPrefs.chartPresetList));
-			}, null, ignoreWarnings));
-		});
-		clearPresets.color = FlxColor.RED;
-		
-		tab_group_visual.add(prsTxt);
-		tab_group_visual.add(prsNm);
-		tab_group_visual.add(newPrsName);
-		tab_group_visual.add(newPrsButton);
-		tab_group_visual.add(lPrs);
-		tab_group_visual.add(prsList);
-		tab_group_visual.add(clearPresets);
-		
-		tab_group_visual.add(uiTxt);
-		tab_group_visual.add(uiBoxTxt);
-		tab_group_visual.add(changecolors);
-		
-		UI_box.addGroup(tab_group_visual);
-	}
-	*/
-	
+				
+				trace('New Preset! [${newPrsName.text}]\nValue: ${ClientPrefs.chartPresets.get(newPrsName.text)}');
+			});
+			
+			var clearPresets = new FlxButton((prsList.x + prsList.width) + 10, 270, "Clear Presets", function() {
+				openSubState(new Prompt('This action will clear all presets.\n\nProceed?', 0, function() {
+					ClientPrefs.chartPresets.clear();
+					ClientPrefs.chartPresetList = ['Default'];
+					ClientPrefs.chartPresets.set('Default', [
+						[FlxColor.fromRGB(0, 0, 0), FlxColor.fromRGB(0, 0, 0)],
+						false,
+						[FlxColor.fromRGB(255, 255, 255), FlxColor.fromRGB(210, 210, 210)],
+						FlxColor.fromRGB(250, 250, 250)
+					]);
+					ClientPrefs.flush();
+					
+					prsList.setData(FlxUIDropDownMenu.makeStrIdLabelArray(ClientPrefs.chartPresetList));
+				}, null, ignoreWarnings));
+			});
+			clearPresets.color = FlxColor.RED;
+			
+			tab_group_visual.add(prsTxt);
+			tab_group_visual.add(prsNm);
+			tab_group_visual.add(newPrsName);
+			tab_group_visual.add(newPrsButton);
+			tab_group_visual.add(lPrs);
+			tab_group_visual.add(prsList);
+			tab_group_visual.add(clearPresets);
+			
+			tab_group_visual.add(uiTxt);
+			tab_group_visual.add(uiBoxTxt);
+			tab_group_visual.add(changecolors);
+			
+			UI_box.addGroup(tab_group_visual);
+		}
+	 */
 	var sectionToCopy:Int = 0;
 	var notesCopied:Array<Dynamic> = [];
 	
@@ -786,15 +794,15 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		notesCopied.resize(0);
 		sectionToCopy = curSec;
 		
-		for (i in 0..._song.notes[curSec].sectionNotes.length)
+		for (i in 0...song.notes[curSec].sectionNotes.length)
 		{
-			var note:Array<Dynamic> = _song.notes[curSec].sectionNotes[i];
+			var note:Array<Dynamic> = song.notes[curSec].sectionNotes[i];
 			notesCopied.push(note);
 		}
 		
 		var startThing:Float = sectionStartTime();
 		var endThing:Float = sectionStartTime(1);
-		for (event in _song.events)
+		for (event in song.events)
 		{
 			var strumTime:Float = event[0];
 			if (endThing > event[0] && event[0] >= startThing)
@@ -830,7 +838,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 					var eventToPush:Array<Dynamic> = note[2][i];
 					copiedEventArray.push([eventToPush[0], eventToPush[1], eventToPush[2]]);
 				}
-				_song.events.push([newStrumTime, copiedEventArray]);
+				song.events.push([newStrumTime, copiedEventArray]);
 			}
 			else if (note[1] >= 0 && ui.songDialog.sectionNotesCheckbox.selected)
 			{
@@ -842,7 +850,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 				{
 					copiedNote = [newStrumTime, note[1], note[2], note[3]];
 				}
-				_song.notes[curSec].sectionNotes.push(copiedNote);
+				song.notes[curSec].sectionNotes.push(copiedNote);
 			}
 		}
 		updateGrid();
@@ -850,19 +858,19 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	
 	function clearSection():Void
 	{
-		if (ui.songDialog.sectionNotesCheckbox.selected) _song.notes[curSec].sectionNotes.resize(0);
+		if (ui.songDialog.sectionNotesCheckbox.selected) song.notes[curSec].sectionNotes.resize(0);
 		
 		if (ui.songDialog.sectionEventsCheckbox.selected)
 		{
-			var i:Int = _song.events.length - 1;
+			var i:Int = song.events.length - 1;
 			var startThing:Float = sectionStartTime();
 			var endThing:Float = sectionStartTime(1);
 			while (i > -1)
 			{
-				var event:Array<Dynamic> = _song.events[i];
+				var event:Array<Dynamic> = song.events[i];
 				if (event != null && endThing > event[0] && event[0] >= startThing)
 				{
-					_song.events.remove(event);
+					song.events.remove(event);
 				}
 				--i;
 			}
@@ -876,19 +884,19 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	{
 		var copySec:Int = (curSec - before);
 		
-		if (before == 0 || _song.notes[copySec] == null) return;
+		if (before == 0 || song.notes[copySec] == null) return;
 		
-		for (note in _song.notes[copySec].sectionNotes)
+		for (note in song.notes[copySec].sectionNotes)
 		{
 			var strum = note[0] + Conductor.stepCrotchet * (getSectionBeats(curSec) * 4 * before);
 			
 			var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
-			_song.notes[curSec].sectionNotes.push(copiedNote);
+			song.notes[curSec].sectionNotes.push(copiedNote);
 		}
 		
 		var startThing:Float = sectionStartTime(-before);
 		var endThing:Float = sectionStartTime(-before + 1);
-		for (event in _song.events)
+		for (event in song.events)
 		{
 			var strumTime:Float = event[0];
 			if (endThing > event[0] && event[0] >= startThing)
@@ -900,7 +908,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 					var eventToPush:Array<Dynamic> = event[1][i];
 					copiedEventArray.push([eventToPush[0], eventToPush[1], eventToPush[2]]);
 				}
-				_song.events.push([strumTime, copiedEventArray]);
+				song.events.push([strumTime, copiedEventArray]);
 			}
 		}
 		updateGrid();
@@ -1054,7 +1062,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		final instVolume:Float = (audio.inst?.volume ?? 1), playerVolume:Float = audio.playerVolume, opponentVolume:Float = audio.opponentVolume;
 		
 		audio.stop();
-		audio.populate(_song);
+		audio.populate(song);
 		audio.pause();
 		
 		audio.inst.volume = instVolume;
@@ -1069,7 +1077,6 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	
 	function generateSong()
 	{
-		
 		audio.inst.onComplete = function() {
 			Conductor.songPosition = (audio.songLength - endOffset);
 			songEnded = true;
@@ -1117,12 +1124,12 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	
 	function sectionStartTime(add:Int = 0):Float
 	{
-		var daBPM:Float = _song.bpm;
+		var daBPM:Float = song.bpm;
 		var daPos:Float = 0;
 		
 		for (i in 0...curSec + add)
 		{
-			if (_song.notes[i]?.changeBPM) daBPM = _song.notes[i].bpm;
+			if (song.notes[i]?.changeBPM) daBPM = song.notes[i].bpm;
 			
 			daPos += (getSectionBeats(i) * (60000 / daBPM));
 		}
@@ -1132,11 +1139,11 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	
 	function getSectionIndex(time:Float = 0):Int
 	{
-		var daBPM:Float = _song.bpm, daPos:Float = 0, i:Int = 0;
+		var daBPM:Float = song.bpm, daPos:Float = 0, i:Int = 0;
 		
 		while (true)
 		{
-			if (_song.notes[i]?.changeBPM) daBPM = _song.notes[i].bpm;
+			if (song.notes[i]?.changeBPM) daBPM = song.notes[i].bpm;
 			
 			daPos += (getSectionBeats(i++) * (60000 / daBPM));
 			
@@ -1199,7 +1206,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		
 		if (Math.ceil(strumLine.y) >= gridBG.height)
 		{
-			if (_song.notes[curSec + 1] == null) addSection();
+			if (song.notes[curSec + 1] == null) addSection();
 			
 			changeSection(curSec + 1, false);
 		}
@@ -1252,7 +1259,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		bpmTxt.text = '${calculateTime(FlxMath.roundDecimal(audio.time, 2))} / ${calculateTime(audio.songLength)} - Beat Snap: ${quantization}th'
 			+ '\nSection: $curSec - Step: $curStep - Beat: ${FlxMath.roundDecimal(curDecBeat, 2)}';
 			
-		var playedSound:Array<Bool> = [for (_ in 0..._song.lanes) false]; // Prevents ouchy sex sounds
+		var playedSound:Array<Bool> = [for (_ in 0...song.lanes) false]; // Prevents ouchy sex sounds
 		
 		colorSine += elapsed;
 		
@@ -1273,12 +1280,13 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 				
 				if (lastConductorPos <= time && audio.playing && note.noteData > -1)
 				{
-					var fullData:Int = (note.noteData + note.lane * _song.keys);
+					var fullData:Int = (note.noteData + note.lane * song.keys);
 					
 					var strum = strumLineNotes.members[fullData];
 					if (strum != null)
 					{
-						strum.playAnim('confirm', true, note);
+						strum.lastNote = note;
+						strum.playAnim('confirm', true);
 						strum.resetAnim = (note.sustainLength / 1000) + 0.15;
 					}
 					
@@ -1288,18 +1296,18 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 					if (!playedSound[note.lane] && ((bfHitsound && note.mustPress) || (dadHitsound && !note.mustPress)))
 					{
 						var soundToPlay = 'hitsound';
-						if (_song.player1 == 'gf') soundToPlay = ('GF_' + Std.string(note.noteData + 1)); // Easter egg
+						if (song.player1 == 'gf') soundToPlay = ('GF_' + Std.string(note.noteData + 1)); // Easter egg
 						
-						FlxG.sound.play(Paths.sound(soundToPlay)).pan = (note.noteData < (_song.keys * .5) ? -0.3 : 0.3); // would be coolio
+						FlxG.sound.play(Paths.sound(soundToPlay)).pan = (note.noteData < (song.keys * .5) ? -0.3 : 0.3); // would be coolio
 						playedSound[note.lane] = true;
 					}
 				}
 			}
 		});
 		
-		if (metronomeVolume > 0 && Math.floor(Conductor.getBeat(lastConductorPos)) != Math.floor(Conductor.getBeat(Conductor.songPosition)))
-			FlxG.sound.play(Paths.sound('Metronome_Tick'), metronomeVolume);
-		
+		if (metronomeVolume > 0 && Math.floor(Conductor.getBeat(lastConductorPos)) != Math.floor(Conductor.getBeat(Conductor.songPosition))) FlxG.sound.play(Paths.sound('Metronome_Tick'),
+			metronomeVolume);
+			
 		playbackSpeed = FlxMath.bound(playbackSpeed, .5, 3);
 		
 		lastConductorPos = Conductor.songPosition;
@@ -1418,7 +1426,6 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 			PlayState.chartingMode = false;
 			FlxG.switchState(funkin.states.editors.MasterEditorMenu.new);
 			FunkinSound.playMusic(Paths.music('freakyMenu'));
-			FlxG.mouse.visible = false;
 			return;
 		}
 		
@@ -1438,11 +1445,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 			updateZoom();
 		}
 		
-		if (FlxG.keys.justPressed.ESCAPE && FlxG.keys.pressed.SHIFT)
-		{
-			if (startTime == 0) playSongFromTimestamp(audio.time);
-			else playSongFromTimestamp(startTime);
-		}
+		if (FlxG.keys.justPressed.ESCAPE && FlxG.keys.pressed.SHIFT) enterSong(startTime > 0 ? startTime : audio.time);
 		if (FlxG.keys.justPressed.ESCAPE)
 		{
 			autosaveSong();
@@ -1498,12 +1501,12 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 			for (note in curSelectedNotes)
 			{
 				if (note[2] != null) deleteNotes.push(note);
-				else _song.events.remove(note);
+				else song.events.remove(note);
 			}
 			
 			if (deleteNotes.length > 0)
 			{
-				for (section in _song.notes)
+				for (section in song.notes)
 				{
 					final secnotes = section.sectionNotes;
 					for (note in deleteNotes)
@@ -1630,6 +1633,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	}
 	
 	var metronomeVolume:Float = 1;
+	
 	function updateVolume():Void
 	{
 		metronomeVolume = (ui.songDialog.metronomeMuteCheckbox.value ? 0 : ui.songDialog.metronomeVolumeStepper.value);
@@ -1646,19 +1650,19 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		if (strumLineNotes != null)
 		{
 			// rewriting noteskin shit i will add this back later
-			// var noteSkin = new NoteSkinHelper(Paths.noteskin(_song.arrowSkin));
+			// var noteSkin = new NoteSkinHelper(Paths.noteskin(song.arrowSkin));
 			
 			// NoteSkinHelper.arrowSkins = [noteSkin.data.playerSkin, noteSkin.data.opponentSkin];
-			// if (_song.lanes > 2) for (i in 2..._song.lanes)
+			// if (song.lanes > 2) for (i in 2...song.lanes)
 			// 	NoteSkinHelper.arrowSkins.push(noteSkin.data.extraSkin);
 			
 			// noteSkin.destroy();
 			
 			strumLineNotes.clear();
 			
-			for (i in 0...(_song.keys * _song.lanes))
+			for (i in 0...(song.keys * song.lanes))
 			{
-				var note:StrumNote = new StrumNote(0, 0, 0, i % _song.keys);
+				var note:StrumNote = new StrumNote(0, 0, 0, i % song.keys);
 				
 				note.setPosition(GRID_SIZE * (i + 1), strumLine.y);
 				note.setGraphicSize(GRID_SIZE, GRID_SIZE);
@@ -1687,7 +1691,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 			insert(idx, strumLine);
 		}
 		
-		strumLine.makeGraphic(Std.int(GRID_SIZE * ((_song.keys * _song.lanes) + 1)), 4);
+		strumLine.makeGraphic(Std.int(GRID_SIZE * ((song.keys * song.lanes) + 1)), 4);
 		
 		// this is all kind of cringe but its okay
 		final rowsPerBeat:Int = Std.int(4 * zoomList[curZoom]);
@@ -1696,7 +1700,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		final curRows:Int = ((getSectionBeats() ?? 0) * rowsPerBeat);
 		final nextRows:Int = ((getSectionBeats(curSec + 1) ?? 0) * rowsPerBeat);
 		
-		final columns:Int = Std.int((_song.keys * _song.lanes) + 1);
+		final columns:Int = Std.int((song.keys * song.lanes) + 1);
 		
 		var light = ClientPrefs.editorBoxColors[0],
 			dark = ClientPrefs.editorBoxColors[1];
@@ -1720,8 +1724,8 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 					var alpha:Int = alpha;
 					var sub:Null<Int> = sub;
 					
-					if ((!_song.notes[curSec].mustHitSection && (x < (_song.keys + 1) || x >= (_song.keys * 2 + 1))) ||
-						(_song.notes[curSec].mustHitSection && (x < 1 || x >= (_song.keys + 1)))) sub ??= 50;
+					if ((!song.notes[curSec].mustHitSection && (x < (song.keys + 1) || x >= (song.keys * 2 + 1))) ||
+						(song.notes[curSec].mustHitSection && (x < 1 || x >= (song.keys + 1)))) sub ??= 50;
 						
 					sub ??= 0;
 					
@@ -1744,7 +1748,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 			prevGridBG.y -= prevGridBG.height;
 		}
 		
-		if (curSec < _song.notes.length)
+		if (curSec < song.notes.length)
 		{
 			nextGridBG = gridLayer.add(prepareGrid(new FlxSprite(), columns, nextRows, 'charterNextGrid', 50, 128));
 			nextGridBG.y += gridBG.height;
@@ -1763,7 +1767,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		{
 			var line = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
 			
-			line.x = (gridBG.x + (i * _song.keys + 1) * GRID_SIZE - 2);
+			line.x = (gridBG.x + (i * song.keys + 1) * GRID_SIZE - 2);
 			line.y = (prevGridBG?.y ?? gridBG.y);
 			
 			line.scale.set(4, (prevGridBG?.height ?? 0) + gridBG.height + (nextGridBG?.height ?? 0));
@@ -1795,7 +1799,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		final opponentVocalsWave:Bool = (FlxG.save.data.chart_waveformOpponentVoices ?? false);
 		
 		waveformSprite.makeGraphic(Std.int(GRID_SIZE * 8), Std.int(GRID_SIZE * 16), 0, 'wave');
-		waveformSprite.setGraphicSize(Std.int(GRID_SIZE * _song.keys * 2), Std.int(gridBG.height));
+		waveformSprite.setGraphicSize(Std.int(GRID_SIZE * song.keys * 2), Std.int(gridBG.height));
 		waveformSprite.updateHitbox();
 		
 		if (!hard && !instWave && !vocalsWave && !opponentVocalsWave) return;
@@ -1804,8 +1808,9 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		
 		waveformPrinted = false;
 		
-		var st:Float = sectionStartTime(), et:Float = (st + Conductor.crotchet * getSectionBeats());
-		
+		var st:Float = sectionStartTime(),
+			et:Float = (st + Conductor.crotchet * getSectionBeats());
+			
 		inline function drawWave(sound:FlxSound, fromX:Float = 0, ?toX:Float, amp:Float = 1)
 		{
 			var buffer = sound?._sound?.__buffer;
@@ -1831,7 +1836,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 			final rightLength:Int = (wavData[1][0].length > wavData[1][1].length ? wavData[1][0].length : wavData[1][1].length);
 			final length:Int = leftLength > rightLength ? leftLength : rightLength;
 			
-			for (i in 0 ... length)
+			for (i in 0...length)
 			{
 				lmin = FlxMath.bound((wavData[0][0][i] ?? 0) * (gSize / 1.12), -hSize, hSize) / 2;
 				lmax = FlxMath.bound((wavData[0][1][i] ?? 0) * (gSize / 1.12), -hSize, hSize) / 2;
@@ -2068,18 +2073,18 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 				curSec = getSectionIndex(newTime);
 			}
 			
-			if (newTime < audio.songLength)
+			if (newTime <= audio.songLength - endOffset)
 			{
 				audio.time = newTime;
 				
-				if (_song.notes.length <= curSec)
+				if (song.notes.length <= curSec)
 				{
-					var old:Int = _song.notes.length;
+					var old:Int = song.notes.length;
 					
-					while (_song.notes.length <= curSec)
+					while (song.notes.length <= curSec)
 						addSection();
 						
-					trace('populated ${_song.notes.length - old} sections');
+					trace('populated ${song.notes.length - old} sections');
 				}
 			}
 			else
@@ -2110,12 +2115,12 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	
 	function updateSectionUI():Void
 	{
-		var sec = _song.notes[curSec];
+		var sec = song.notes[curSec];
 		
 		ui.songDialog.sectionBeatsStepper.value = getSectionBeats();
-		ui.songDialog.mustHitCheckbox.selected = sec.mustHitSection;
-		ui.songDialog.gfSectionCheckbox.selected = sec.gfSection;
-		ui.songDialog.bpmCheckbox.selected = sec.changeBPM;
+		ui.songDialog.mustHitCheckbox.value = sec.mustHitSection;
+		ui.songDialog.gfSectionCheckbox.value = sec.gfSection;
+		ui.songDialog.bpmCheckbox.value = sec.changeBPM;
 		ui.songDialog.bpmStepper.value = sec.bpm;
 		
 		updateHeads();
@@ -2123,10 +2128,10 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	
 	function updateHeads():Void
 	{
-		var mustHit:Bool = _song.notes[curSec].mustHitSection;
-		var isGF:Bool = _song.notes[curSec].gfSection;
+		var mustHit:Bool = song.notes[curSec].mustHitSection;
+		var isGF:Bool = song.notes[curSec].gfSection;
 		
-		rightIcon.visible = (_song.lanes > 1);
+		rightIcon.visible = (song.lanes > 1);
 		
 		leftIcon.updateOffset = rightIcon.updateOffset = false;
 		
@@ -2138,8 +2143,8 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		rightIcon.setGraphicSize(0, 45);
 		rightIcon.updateHitbox();
 		
-		leftIcon.x = (GRID_SIZE * (_song.keys * .5 + 1) - leftIcon.width * .5);
-		rightIcon.x = (GRID_SIZE * (_song.keys * 1.5 + 1) - rightIcon.width * .5);
+		leftIcon.x = (GRID_SIZE * (song.keys * .5 + 1) - leftIcon.width * .5);
+		rightIcon.x = (GRID_SIZE * (song.keys * 1.5 + 1) - rightIcon.width * .5);
 		
 		leftIcon.y = (-leftIcon.height);
 		rightIcon.y = (-rightIcon.height);
@@ -2158,14 +2163,8 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		var minTime:Float = Lambda.fold(curSelectedNotes, (note, r) -> Math.min(note[0], r), Math.POSITIVE_INFINITY);
 		var minLength:Float = Lambda.fold(notes, (note, r) -> Math.max(note[2], r), 0);
 		
-		ui.songDialog.strumTimeStepper.pauseEvent('change');
-		ui.songDialog.sustainLengthStepper.pauseEvent('change');
-		
-		ui.songDialog.strumTimeStepper.value = minTime;
-		ui.songDialog.sustainLengthStepper.value = minLength;
-		
-		ui.songDialog.strumTimeStepper.resumeEvent('change', true);
-		ui.songDialog.sustainLengthStepper.resumeEvent('change', true);
+		ui.songDialog.strumTimeStepper.changeSilent(minTime);
+		ui.songDialog.sustainLengthStepper.changeSilent(minLength);
 		
 		if (notes.length == 1)
 		{
@@ -2197,7 +2196,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		
 		// CURRENT SECTION
 		var beats:Float = getSectionBeats();
-		for (i in _song.notes[curSec].sectionNotes)
+		for (i in song.notes[curSec].sectionNotes)
 		{
 			var note:EditorNote = setupNoteData(i, false);
 			curRenderedNotes.add(note);
@@ -2227,7 +2226,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		// CURRENT EVENTS
 		var startThing:Float = sectionStartTime();
 		var endThing:Float = sectionStartTime(1);
-		for (i in _song.events)
+		for (i in song.events)
 		{
 			if (endThing > i[0] && i[0] >= startThing)
 			{
@@ -2250,9 +2249,9 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		
 		// NEXT SECTION
 		var beats:Float = getSectionBeats(1);
-		if (curSec < _song.notes.length - 1)
+		if (curSec < song.notes.length - 1)
 		{
-			for (i in _song.notes[curSec + 1].sectionNotes)
+			for (i in song.notes[curSec + 1].sectionNotes)
 			{
 				var note:EditorNote = setupNoteData(i, true, false);
 				note.alpha = 0.6;
@@ -2268,7 +2267,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		var beats:Float = getSectionBeats(-1);
 		if (curSec > 0)
 		{
-			for (i in _song.notes[curSec - 1].sectionNotes)
+			for (i in song.notes[curSec - 1].sectionNotes)
 			{
 				var note:EditorNote = setupNoteData(i, false, true);
 				note.alpha = 0.6;
@@ -2283,7 +2282,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		// NEXT EVENTS
 		var startThing:Float = sectionStartTime(1);
 		var endThing:Float = sectionStartTime(2);
-		for (i in _song.events)
+		for (i in song.events)
 		{
 			if (endThing > i[0] && i[0] >= startThing)
 			{
@@ -2304,10 +2303,10 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		var intendedData = daNoteInfo;
 		if (!shifted)
 		{
-			if (daNoteInfo % _song.keys != daNoteInfo % initialKeyCount)
+			if (daNoteInfo % song.keys != daNoteInfo % initialKeyCount)
 			{
 				shifted = true;
-				intendedData = daNoteInfo + (_song.keys - initialKeyCount);
+				intendedData = daNoteInfo + (song.keys - initialKeyCount);
 			}
 		}
 		else
@@ -2317,20 +2316,20 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		
 		if (daNoteInfo != intendedData && (!isNextSection && !isPrevSection))
 		{
-			for (p in _song.notes[curSec].sectionNotes)
+			for (p in song.notes[curSec].sectionNotes)
 			{
 				if (p[0] == daStrumTime && p[1] == daNoteInfo && !p[4])
 				{
-					_song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.indexOf(p)][1] = intendedData;
-					_song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.indexOf(p)][4] = true;
-					trace('previous data: $daNoteInfo | new data: $intendedData | _song.notes data: ${_song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.indexOf(p)][1]} | youre not gonna shift again..? ${_song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.indexOf(p)][4]}');
+					song.notes[curSec].sectionNotes[song.notes[curSec].sectionNotes.indexOf(p)][1] = intendedData;
+					song.notes[curSec].sectionNotes[song.notes[curSec].sectionNotes.indexOf(p)][4] = true;
+					trace('previous data: $daNoteInfo | new data: $intendedData | song.notes data: ${song.notes[curSec].sectionNotes[song.notes[curSec].sectionNotes.indexOf(p)][1]} | youre not gonna shift again..? ${song.notes[curSec].sectionNotes[song.notes[curSec].sectionNotes.indexOf(p)][4]}');
 				}
 			}
 		}
 		
-		var note:EditorNote = new EditorNote(daStrumTime, intendedData % _song.keys, null, null, true);
-		note.lane = Std.int(Math.max(Math.floor(intendedData / _song.keys), 0));
-		note.noteData = intendedData % _song.keys;
+		var note:EditorNote = new EditorNote(daStrumTime, intendedData % song.keys, null, null, true);
+		note.lane = Std.int(Math.max(Math.floor(intendedData / song.keys), 0));
+		note.noteData = intendedData % song.keys;
 		note.alreadyShifted = true;
 		note.chartData = i;
 		
@@ -2342,7 +2341,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 				{
 					i[3] = noteTypeIntMap.get(i[3]);
 				}
-				if (i.length > (_song.keys - 1) && (i[_song.keys - 1] == null || i[_song.keys - 1].length < 1))
+				if (i.length > (song.keys - 1) && (i[song.keys - 1] == null || i[song.keys - 1].length < 1))
 				{
 					i.remove(i[3]);
 				}
@@ -2406,10 +2405,10 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	
 	private function addSection(sectionBeats:Int = 4):Void
 	{
-		var sec:SwagSection =
+		var sec:SongSection =
 			{
 				sectionBeats: sectionBeats,
-				bpm: _song.bpm,
+				bpm: song.bpm,
 				changeBPM: false,
 				mustHitSection: true,
 				gfSection: false,
@@ -2417,7 +2416,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 				altAnim: false
 			};
 			
-		_song.notes.push(sec);
+		song.notes.push(sec);
 	}
 	
 	function selectNote(note:EditorNote):Void
@@ -2427,7 +2426,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		
 		if (note.noteData >= 0)
 		{
-			var noteDataToCheck:Int = (note.noteData + note.lane * _song.keys);
+			var noteDataToCheck:Int = (note.noteData + note.lane * song.keys);
 		}
 		else if (curSelectedNotes.length == 1)
 		{
@@ -2445,14 +2444,14 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		
 		if (note.noteData > -1) // Normal Notes
 		{
-			noteDataToCheck = (note.noteData + note.lane * _song.keys);
+			noteDataToCheck = (note.noteData + note.lane * song.keys);
 			
 			// FlxG.log.add('FOUND EVIL NOTE');
-			_song.notes[curSec].sectionNotes.remove(note.chartData);
+			song.notes[curSec].sectionNotes.remove(note.chartData);
 		}
 		else // Events
 		{
-			_song.events.remove(note.chartData);
+			song.events.remove(note.chartData);
 		}
 		
 		if (update)
@@ -2467,7 +2466,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	{
 		for (note in curRenderedNotes)
 		{
-			if (Math.abs(cs - quantize(note.strumTime)) < 3 && d == (note.noteData + note.lane * _song.keys)) return deleteNote(note);
+			if (Math.abs(cs - quantize(note.strumTime)) < 3 && d == (note.noteData + note.lane * song.keys)) return deleteNote(note);
 		}
 		
 		holdingNotes[d] = addNote(cs, d, style);
@@ -2475,9 +2474,9 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	
 	function clearSong():Void
 	{
-		for (daSection in 0..._song.notes.length)
+		for (daSection in 0...song.notes.length)
 		{
-			_song.notes[daSection].sectionNotes = [];
+			song.notes[daSection].sectionNotes = [];
 		}
 		
 		updateGrid();
@@ -2486,7 +2485,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	private function addNote(strum:Null<Float> = null, data:Null<Int> = null, type:Null<Int> = null):Array<Dynamic>
 	{
 		// curUndoIndex++;
-		// var newsong = _song.notes;
+		// var newsong = song.notes;
 		//	undos.push(newsong);
 		var noteStrum = getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false) + sectionStartTime();
 		var noteData = Math.floor((FlxG.mouse.x - GRID_SIZE) / GRID_SIZE);
@@ -2505,7 +2504,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		if (noteData > -1)
 		{
 			newNote = [noteStrum, noteData, noteSus, noteTypeIntMap.get(daType), true];
-			_song.notes[curSec].sectionNotes.push(newNote);
+			song.notes[curSec].sectionNotes.push(newNote);
 			
 			if (FlxG.keys.pressed.CONTROL) choirNotes([newNote]);
 		}
@@ -2516,7 +2515,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 			var text2 = ui.songDialog.value2Field.value;
 			
 			newNote = [noteStrum, [[event, text1, text2]]];
-			_song.events.push(newNote);
+			song.events.push(newNote);
 			
 			if (!FlxG.keys.pressed.SHIFT || curSelectedNotes.length == 0) curEventSelected = 0;
 		}
@@ -2533,7 +2532,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	
 	function choirNotes(notesArray:Array<Dynamic>):Void
 	{
-		final notes:Array<Dynamic> = _song.notes[curSec].sectionNotes;
+		final notes:Array<Dynamic> = song.notes[curSec].sectionNotes;
 		final duetNotes:Array<Array<Dynamic>> = [];
 		
 		if (notesArray.length == 0) notesArray = notes;
@@ -2542,9 +2541,9 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		{
 			if (note[1] < 0) continue;
 			
-			for (i in 0..._song.lanes)
+			for (i in 0...song.lanes)
 			{
-				var newData:Int = Std.int((note[1] % _song.keys) + i * _song.keys);
+				var newData:Int = Std.int((note[1] % song.keys) + i * song.keys);
 				var overlap:Bool = false;
 				
 				for (otherNote in notes)
@@ -2602,11 +2601,11 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 			final minTime:Float = sectionStartTime();
 			final maxTime:Float = (startTime + getSectionBeats() * Conductor.crotchet);
 			
-			for (note in _song.notes[curSec].sectionNotes)
+			for (note in song.notes[curSec].sectionNotes)
 			{
 				if (note[1] < 0) continue;
 				
-				if (axes.x) note[1] = ((_song.keys - (note[1] % _song.keys) - 1) + Std.int(note[1] / _song.keys) * _song.keys);
+				if (axes.x) note[1] = ((song.keys - (note[1] % song.keys) - 1) + Std.int(note[1] / song.keys) * song.keys);
 				
 				if (axes.y) note[0] = (maxTime - note[0] + minTime);
 			}
@@ -2620,8 +2619,8 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		if (notesArray.length == 0)
 		{
 			minStrumline = 0;
-			maxStrumline = (_song.lanes - 1);
-			notesArray = _song.notes[curSec].sectionNotes;
+			maxStrumline = (song.lanes - 1);
+			notesArray = song.notes[curSec].sectionNotes;
 		}
 		else
 		{
@@ -2634,7 +2633,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 			if (note[1] < 0) continue;
 			
 			var newStrumline:Int = fun(getStrumline(note[1]), minStrumline, maxStrumline);
-			note[1] = ((note[1] % _song.keys) + newStrumline * _song.keys);
+			note[1] = ((note[1] % song.keys) + newStrumline * song.keys);
 		}
 	}
 	
@@ -2648,21 +2647,21 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		return (maxStrumline - noteStrumline + minStrumline);
 	}
 	
-	inline function getStrumline(index:Int):Int return Std.int(index / _song.keys);
+	inline function getStrumline(index:Int):Int return Std.int(index / song.keys);
 	
 	// will figure this out l8r
 	// lol you didnt so i had to
 	function redo()
 	{
-		// _song = redos[curRedoIndex];
+		// song = redos[curRedoIndex];
 	}
 	
 	function undo()
 	{
-		// redos.push(_song);
+		// redos.push(song);
 		undos.pop();
-		// _song.notes = undos[undos.length - 1];
-		///trace(_song.notes);
+		// song.notes = undos[undos.length - 1];
+		///trace(song.notes);
 		// updateGrid();
 	}
 	
@@ -2691,7 +2690,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	{
 		var noteData:Array<Dynamic> = [];
 		
-		for (i in _song.notes)
+		for (i in song.notes)
 		{
 			noteData.push(i.sectionNotes);
 		}
@@ -2723,23 +2722,23 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	{
 		FlxG.save.data.autosave = Json.stringify(
 			{
-				"song": _song
+				"song": song
 			});
 		FlxG.save.flush();
 	}
 	
 	function clearEvents()
 	{
-		_song.events = [];
+		song.events = [];
 		updateGrid();
 	}
 	
 	private function saveLevel()
 	{
-		if (_song.events != null && _song.events.length > 1) _song.events.sort(sortByTime);
+		if (song.events != null && song.events.length > 1) song.events.sort(sortByTime);
 		var json =
 			{
-				"song": _song
+				"song": song
 			};
 			
 		var data:String = Json.stringify(json, "\t");
@@ -2750,7 +2749,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data.trim(), Paths.sanitize(_song.song) + ".json");
+			_file.save(data.trim(), Paths.sanitize(song.song) + ".json");
 		}
 	}
 	
@@ -2761,10 +2760,10 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	
 	private function saveEvents()
 	{
-		if (_song.events != null && _song.events.length > 1) _song.events.sort(sortByTime);
+		if (song.events != null && song.events.length > 1) song.events.sort(sortByTime);
 		var eventsSong:Dynamic =
 			{
-				events: _song.events
+				events: song.events
 			};
 		var json =
 			{
@@ -2817,27 +2816,15 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 	
 	function getSectionBeats(?section:Int):Null<Int>
 	{
-		return (_song.notes[section ?? curSec]?.sectionBeats ?? 4);
+		return (song.notes[section ?? curSec]?.sectionBeats ?? 4);
 	}
 	
-	public static function enterSong()
+	public static function enterSong(?time:Float)
 	{
 		autosaveSong();
-		FlxG.mouse.visible = false;
-		PlayState.SONG = _song;
 		
-		instance?.audio.stop();
-		
-		FlxG.switchState(PlayState.new);
-	}
-	
-	public static function playSongFromTimestamp(time:Float)
-	{
-		autosaveSong();
-		FlxG.mouse.visible = false;
-		PlayState.SONG = _song;
-		
-		PlayState.startOnTime = time;
+		if (time != null) PlayState.startOnTime = time;
+		PlayState.SONG = song;
 		
 		instance?.audio.stop();
 		
@@ -2937,9 +2924,9 @@ class ChartingOptionsSubmenu extends MusicBeatSubstate
 				case 'Play from beginning':
 					ChartEditorState.enterSong();
 				case 'Play from here':
-					ChartEditorState.playSongFromTimestamp(ChartEditorState.instance.audio.time);
+					ChartEditorState.enterSong(ChartEditorState.instance.audio.time);
 				case 'Play from start time':
-					ChartEditorState.playSongFromTimestamp(ChartEditorState.startTime);
+					ChartEditorState.enterSong(ChartEditorState.startTime);
 				case 'Set start time':
 					ChartEditorState.startTime = ChartEditorState.instance.audio.time;
 				case 'Exit to Editor Menu':

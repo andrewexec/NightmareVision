@@ -1,6 +1,6 @@
 package funkin.data;
 
-typedef SwagSection =
+typedef SongSection =
 {
 	var sectionNotes:Array<Dynamic>;
 	var mustHitSection:Bool;
@@ -12,10 +12,10 @@ typedef SwagSection =
 	var altAnim:Bool;
 }
 
-typedef SwagSong =
+typedef Song =
 {
 	var song:String;
-	var notes:Array<SwagSection>;
+	var notes:Array<SongSection>;
 	var events:Array<Dynamic>;
 	var bpm:Float;
 	var needsVoices:Bool;

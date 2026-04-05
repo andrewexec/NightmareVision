@@ -11,11 +11,9 @@ import funkin.game.shaders.RGBPalette.RGBShaderReference;
 import funkin.states.*;
 import funkin.data.*;
 
-class StrumNote extends FlxSprite implements funkin.game.modchart.IModNote
+class StrumNote extends FunkinSprite implements funkin.game.modchart.IModNote
 {
 	public var intThing:Int = 0;
-	
-	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
 	
 	public var resetAnim:Float = 0;
 	public var noteData:Int = 0;
@@ -29,14 +27,6 @@ class StrumNote extends FlxSprite implements funkin.game.modchart.IModNote
 	public var parent:PlayField;
 	@:isVar
 	public var swagWidth(get, null):Float;
-	
-	public var animOffsets:Map<String, Array<Float>> = new Map();
-	
-	// stupid editor crashes
-	public function getAnimName()
-	{
-		return animation?.curAnim?.name ?? 'static';
-	}
 	
 	public function get_swagWidth()
 	{
@@ -92,9 +82,13 @@ class StrumNote extends FlxSprite implements funkin.game.modchart.IModNote
 		handleColors();
 	}
 	
+	public var lastNote:Null<Note> = null;
 	public function handleColors(anim:String = '', ?note:Note)
 	{
 		if (!useRGBShader) return;
+		
+		note ??= lastNote;
+		lastNote = note;
 		
 		final fallback = skin.colors != null ? NoteUtil.colorToArray(skin.colors[noteData]) : NoteUtil.getCurColors(noteData, (isQuant && note != null) ? note.quant : 4, player);
 		
@@ -124,7 +118,7 @@ class StrumNote extends FlxSprite implements funkin.game.modchart.IModNote
 		
 		loadAnimations();
 		
-		defScale.copyFrom(scale);
+		baseScale.copyFrom(scale);
 		updateHitbox();
 		
 		antialiasing = skin.antialiasing;
@@ -143,11 +137,6 @@ class StrumNote extends FlxSprite implements funkin.game.modchart.IModNote
 			addAnim(anim);
 	}
 	
-	public function hasAnim(anim:String)
-	{
-		return animation.exists(anim) && animOffsets.exists(anim);
-	}
-	
 	function addAnim(_anim:funkin.data.NoteSkin.Animation)
 	{
 		final anim = _anim ?? NoteUtil.fallbackReceptorAnims[0];
@@ -156,15 +145,6 @@ class StrumNote extends FlxSprite implements funkin.game.modchart.IModNote
 		{
 			animation.addByPrefix(anim.anim, anim.xmlName, anim.fps, anim.looping);
 			addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-		}
-	}
-	
-	function removeAnim(anim:String)
-	{
-		if (hasAnim(anim))
-		{
-			animation.remove(anim);
-			animOffsets.remove(anim);
 		}
 	}
 	
@@ -191,30 +171,16 @@ class StrumNote extends FlxSprite implements funkin.game.modchart.IModNote
 		@:bypassAccessor
 		super.set_alpha(targetAlpha * alphaMult);
 		
-		if (animation.curAnim?.name == 'confirm') centerOrigin();
-		
 		super.update(elapsed);
 	}
 	
-	public function playAnim(anim:String, ?force:Bool = false, ?note:Note)
+	public override function playAnim(anim:String, force:Bool = false, isReversed:Bool = false, frame:Int = 0)
 	{
-		animation.play(anim, force);
+		super.playAnim(anim, force, isReversed, frame);
+		
 		centerOffsets();
 		centerOrigin();
 		
-		if (animOffsets.exists(anim)) offset.set(offset.x + animOffsets.get(anim)[0], offset.y + animOffsets.get(anim)[1]);
-		
-		handleColors(anim, note);
-	}
-	
-	public function addOffset(name:String, x:Float = 0, y:Float = 0)
-	{
-		animOffsets[name] = [x, y];
-	}
-	
-	override function destroy()
-	{
-		defScale.put();
-		super.destroy();
+		handleColors(anim);
 	}
 }

@@ -1,5 +1,7 @@
 package;
 
+import funkin.utils.WindowUtil;
+
 import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
@@ -47,10 +49,7 @@ class Main extends Sprite
 		
 		initHaxeUI();
 		
-		#if (windows && cpp)
-		cpp.Windows.setDarkMode();
-		cpp.Windows.setDpiAware();
-		#end
+		WindowUtil.resetWindow();
 		
 		// load save data before creating FlxGame
 		ClientPrefs.loadDefaultKeys();

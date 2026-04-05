@@ -1,7 +1,5 @@
 package funkin.states.editors;
 
-import extensions.openfl.FileReferenceEx;
-
 import haxe.io.Path;
 
 import flixel.group.FlxSpriteContainer;
@@ -13,9 +11,6 @@ import haxe.ui.components.CheckBox;
 import haxe.ui.components.Button;
 import haxe.ui.components.Slider;
 import haxe.ui.backend.flixel.UIState;
-
-import openfl.events.Event;
-import openfl.net.FileReference;
 
 import flixel.group.FlxContainer;
 import flixel.graphics.FlxGraphic;
@@ -1429,8 +1424,6 @@ class CharacterEditorState extends UIState // MUST EXTEND UI STATE needed for ac
 		charLayer.sort(SortUtil.sortByZ, flixel.util.FlxSort.ASCENDING);
 	}
 	
-	var fileRef = new FileReferenceEx();
-	
 	function saveCharToFile()
 	{
 		final json =
@@ -1460,23 +1453,25 @@ class CharacterEditorState extends UIState // MUST EXTEND UI STATE needed for ac
 		
 		if (dataToSave.length > 0)
 		{
-			fileRef.onFileSave = (path) -> {
+			function onFileSave(path:String)
+			{
 				final char = path.withoutDirectory().withoutExtension();
 				ToolKitUtils.makeNotification('Character File Saving', 'Character ($char) was successfully saved.', Success);
 				FlxG.sound.play(Paths.sound('ui/success'));
-			};
-			fileRef.onFileCancel = () -> {
+			}
+			
+			function onFileCancel()
+			{
 				ToolKitUtils.makeNotification('Character File Saving', 'Character saving was canceled.', Warning);
 				FlxG.sound.play(Paths.sound('ui/warn'));
-			};
+			}
 			
-			fileRef.save(dataToSave, '$characterId.json');
+			FileUtil.saveFile(dataToSave, '$characterId.json', onFileSave, onFileCancel);
 		}
 	}
 	
 	override function destroy()
 	{
-		fileRef?.destroy();
 		super.destroy();
 	}
 	

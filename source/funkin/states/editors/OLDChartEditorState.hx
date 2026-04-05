@@ -43,14 +43,14 @@ import funkin.backend.Difficulty;
 import funkin.data.Song;
 import funkin.states.substates.Prompt;
 import funkin.backend.Conductor.BPMChangeEvent;
-import funkin.data.Song.SwagSong;
+import funkin.data.Song;
 import funkin.scripts.*;
 import funkin.states.*;
 import funkin.objects.*;
 import funkin.objects.note.*;
 import funkin.states.editors.ui.EditorNote;
 import funkin.backend.MusicBeatSubstate;
-import funkin.states.editors.ChartEditorState.AttachedFlxText;
+import funkin.states.editors.ChartEditorState;
 
 #if sys
 import openfl.media.Sound;
@@ -58,67 +58,6 @@ import openfl.media.Sound;
 import sys.FileSystem;
 import sys.io.File;
 #end
-
-// this was neat //probably will rewrite the uhhh sing4 being idle later
-class OurLittleDiddy extends FlxSprite
-{
-	var _colors:Array<FlxColor> = [FlxColor.MAGENTA, FlxColor.CYAN, FlxColor.LIME, FlxColor.RED, FlxColor.WHITE];
-	var _dances:Array<String> = ['left', 'down', 'up', 'right', 'idle'];
-	
-	var _offsetPath:String = '';
-	
-	public var offsets:IntMap<Array<Float>> = new IntMap();
-	
-	public function new(char:String)
-	{
-		super();
-		final basePath = 'images/editors/friends/$char';
-		if (FunkinAssets.exists(Paths.getCorePath('$basePath.png')))
-		{
-			frames = Paths.getSparrowAtlas(basePath.substr(basePath.indexOf('/') + 1));
-			animation.addByPrefix('idle', 'i', 24);
-			animation.addByPrefix('left', 'l', 24, false);
-			animation.addByPrefix('down', 'd', 24, false);
-			animation.addByPrefix('up', 'u', 24, false);
-			animation.addByPrefix('right', 'r', 24, false);
-			
-			setGraphicSize(100);
-			updateHitbox();
-			
-			buildOffsets(basePath);
-			
-			sing(4);
-		}
-	}
-	
-	function buildOffsets(?path:String)
-	{
-		path ??= _offsetPath;
-		if (FunkinAssets.exists(Paths.getCorePath('$path.txt'))) for (k => i in File.getContent(Paths.getCorePath('$path.txt')).trim().split('\n'))
-		{
-			var value = i.trim().split(',');
-			offsets.set(k, [Std.parseFloat(value[0]), Std.parseFloat(value[1])]);
-		}
-		
-		_offsetPath = path;
-	}
-	
-	public function sing(dir:Int)
-	{
-		animation.play(_dances[dir], true);
-		
-		color = _colors[dir];
-		
-		centerOffsets();
-		
-		if (offsets.exists(dir))
-		{
-			offset.x += offsets.get(dir)[0] * scale.x;
-			offset.y += offsets.get(dir)[1] * scale.y;
-		}
-		// else offset.set();
-	}
-}
 
 @:access(flixel.sound.FlxSound._sound)
 @:access(openfl.media.Sound.__buffer)
@@ -242,7 +181,7 @@ class OLDChartEditorState extends MusicBeatState
 	var curUndoIndex = 0;
 	var curRedoIndex = 0;
 	
-	public static var _song:SwagSong;
+	static var _song:Song;
 	
 	/*
 	 * WILL BE THE CURRENT / LAST PLACED NOTE
@@ -293,8 +232,8 @@ class OLDChartEditorState extends MusicBeatState
 	var bg:FlxSprite;
 	var gradient:FlxBackdrop;
 	var canAddNotes:Bool = true;
-	var littleBF:OurLittleDiddy;
-	var littleDad:OurLittleDiddy;
+	var littleBF:OurLittleFriend;
+	var littleDad:OurLittleFriend;
 	var littleStage:FlxSprite;
 	var dadIcon:String = 'dad';
 	var bfIcon:String = 'bf';
@@ -305,33 +244,9 @@ class OLDChartEditorState extends MusicBeatState
 	override function create()
 	{
 		instance = this;
-		if (PlayState.SONG != null) _song = PlayState.SONG;
-		else
-		{
-			Difficulty.reset();
-			
-			_song =
-				{
-					song: 'test',
-					trackSwap: false,
-					notes: [],
-					events: [],
-					bpm: 100.0,
-					needsVoices: true,
-					arrowSkins: ['default', 'default'],
-					// arrowSkin: 'default',
-					// splashSkin: 'default',
-					player1: 'bf',
-					player2: 'bf',
-					gfVersion: 'gf',
-					speed: 1,
-					stage: 'stage',
-					keys: 4,
-					lanes: 2
-				};
-			addSection();
-			PlayState.SONG = _song;
-		}
+		
+		_song = (ChartEditorState.song ?? ChartEditorState.getDefaultSong());
+		
 		initialKeyCount = _song.keys;
 		ClientPrefs.load();
 		
@@ -542,12 +457,12 @@ class OLDChartEditorState extends MusicBeatState
 		// temp
 		var isInfry:Bool = FlxG.random.bool(50);
 		
-		littleBF = new OurLittleDiddy(isInfry ? 'dingalingdemon' : 'bf');
+		littleBF = new OurLittleFriend(isInfry ? 'dingalingdemon' : 'bf');
 		littleBF.setPosition(210, FlxG.height - littleBF.height - 50);
 		littleBF.scrollFactor.set();
 		littleBF.camera = camHUD;
 		
-		littleDad = new OurLittleDiddy(isInfry ? "opp" : 'fella');
+		littleDad = new OurLittleFriend(isInfry ? "opp" : 'fella');
 		littleDad.setPosition(10, FlxG.height - littleDad.height - 50);
 		littleDad.scrollFactor.set();
 		littleDad.camera = camHUD;
@@ -2533,11 +2448,12 @@ class OLDChartEditorState extends MusicBeatState
 					var strum = strumLineNotes.members[fullData];
 					if (strum != null)
 					{
-						strum.playAnim('confirm', true, note);
+						strum.lastNote = note;
+						strum.playAnim('confirm', true);
 						strum.resetAnim = (note.sustainLength / 1000) + 0.15;
 					}
 					
-					var char:OurLittleDiddy = note.mustPress ? littleBF : littleDad;
+					var char:OurLittleFriend = note.mustPress ? littleBF : littleDad;
 					char.sing(note.noteData % 4);
 					
 					if (!playedSound[note.lane] && ((playSoundBf.checked && note.mustPress) || (playSoundDad.checked && !note.mustPress)))
@@ -3544,7 +3460,7 @@ class OLDChartEditorState extends MusicBeatState
 	
 	private function addSection(sectionBeats:Int = 4):Void
 	{
-		var sec:SwagSection =
+		var sec:SongSection =
 			{
 				sectionBeats: sectionBeats,
 				bpm: _song.bpm,

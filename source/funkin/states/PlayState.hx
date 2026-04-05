@@ -31,10 +31,8 @@ import funkin.objects.note.*;
 import funkin.objects.note.Note;
 import funkin.game.huds.BaseHUD;
 import funkin.scripts.*;
-import funkin.data.Song.SwagSong;
-import funkin.data.Song.SwagSection;
+import funkin.data.Song;
 import funkin.data.StageData;
-import funkin.objects.DialogueBoxPsych;
 import funkin.game.Rating;
 import funkin.objects.*;
 import funkin.data.*;
@@ -57,7 +55,7 @@ class PlayState extends MusicBeatState
 	
 	public static var meta:Null<Metadata> = null; // bad?
 	
-	public static var SONG:Null<SwagSong> = null;
+	public static var SONG:Null<Song> = null;
 	
 	public static var storyMeta:StoryMeta = new StoryMeta();
 	
@@ -931,38 +929,6 @@ class PlayState extends MusicBeatState
 		return script;
 	}
 	
-	public var psychDialogue:Null<DialogueBoxPsych> = null;
-	
-	// you should be able to do "startDialogue(DialogueBoxPsych.parseDialogue(pathToJson));""
-	public function startDialogue(dialogueFile:DialogueFile, ?song:String = null):Void
-	{
-		// TO DO: Make this more flexible, maybe?
-		if (psychDialogue != null) return;
-		
-		if (dialogueFile.dialogue.length > 0)
-		{
-			inCutscene = true;
-			
-			Paths.sound('dialogue');
-			Paths.sound('dialogueClose');
-			psychDialogue = new DialogueBoxPsych(dialogueFile, song);
-			psychDialogue.scrollFactor.set();
-			psychDialogue.finishThing = function() {
-				psychDialogue = null;
-				if (endingSong) endSong();
-				else startCountdown();
-			}
-			psychDialogue.cameras = [camHUD];
-			add(psychDialogue);
-		}
-		else
-		{
-			FlxG.log.warn('Your dialogue file is badly formatted!');
-			if (endingSong) endSong();
-			else startCountdown();
-		}
-	}
-	
 	public var skipArrowStartTween:Bool = false;
 	
 	var splashLayering:Array<Dynamic> = [];
@@ -1349,7 +1315,7 @@ class PlayState extends MusicBeatState
 		for (i in splashLayering)
 			add(i);
 			
-		final noteData:Array<SwagSection> = songData.notes;
+		final noteData:Array<SongSection> = songData.notes;
 		
 		// loads note types
 		for (section in noteData)
@@ -1816,8 +1782,7 @@ class PlayState extends MusicBeatState
 			
 			modManager.updateObject(curDecBeat, obj, pos, id);
 			
-			obj.x += ((offsets?.x ?? 0) * obj.scale.x / obj.defScale.x);
-			obj.y += ((offsets?.y ?? 0) * obj.scale.y / obj.defScale.y);
+			obj.spriteOffset.set(offsets?.x, offsets?.y);
 			
 			return pos;
 		}
@@ -1878,8 +1843,8 @@ class PlayState extends MusicBeatState
 				
 				modManager.updateObject(curDecBeat, daNote, pos, daNote.lane);
 				
-				var scaleXMult:Float = (daNote.scale.x / daNote.defScale.x),
-					scaleYMult:Float = (daNote.scale.y / daNote.defScale.y);
+				daNote.spriteOffset.x = (skin.noteOffsets[daNote.noteData].x + daNote.offsetX);
+				daNote.spriteOffset.y = (skin.noteOffsets[daNote.noteData].y + daNote.offsetY);
 					
 				if (daNote.isSustainNote)
 				{
@@ -1898,27 +1863,24 @@ class PlayState extends MusicBeatState
 					
 					if (daNote.wasGoodHit && daNote.parent?.sustainSplash != null && field.trackSustainSplashes) daNote.parent.sustainSplash.angle = daNote.angle;
 					
-					daNote.x += (skin.sustainOffsets[daNote.noteData].x * scaleXMult);
-					daNote.y += (skin.sustainOffsets[daNote.noteData].y * scaleYMult);
+					daNote.spriteOffset.x += skin.sustainOffsets[daNote.noteData].x;
+					daNote.spriteOffset.y += skin.sustainOffsets[daNote.noteData].y;
 					if (daNote.isSustainEnd)
 					{
-						daNote.x += (skin.susEndOffsets[daNote.noteData].x * scaleXMult);
-						daNote.y += (skin.susEndOffsets[daNote.noteData].y * scaleYMult);
+						daNote.spriteOffset.x += skin.susEndOffsets[daNote.noteData].x;
+						daNote.spriteOffset.y += skin.susEndOffsets[daNote.noteData].y;
 					}
 					else
 					{
 						final dist:Float = Math.sqrt(Math.pow(pos.y - nextPos.y, 2) + Math.pow(pos.x - nextPos.x, 2));
 						
-						daNote.scale.y = daNote.defScale.y = (dist / (daNote.frameHeight - (daNote.antialiasing ? 1 : 0)));
+						daNote.scale.y = daNote.baseScale.y = (dist / (daNote.frameHeight - (daNote.antialiasing ? 1 : 0)));
 					}
 					
 					daNote.clip(daNote.playField.members[daNote.noteData]);
 					
 					nextPos.put();
 				}
-				
-				daNote.x += ((skin.noteOffsets[daNote.noteData].x + daNote.offsetX) * scaleXMult);
-				daNote.y += ((skin.noteOffsets[daNote.noteData].y + daNote.offsetY) * scaleYMult);
 			}
 		}
 		
@@ -2073,7 +2035,8 @@ class PlayState extends MusicBeatState
 		paused = true;
 		CoolUtil.cancelMusicFadeTween();
 		
-		FlxG.switchState(OLDChartEditorState.new);
+		ChartEditorState.song = SONG;
+		FlxG.switchState(FlxG.keys.pressed.SHIFT ? ChartEditorState.new : OLDChartEditorState.new);
 		chartingMode = true;
 		
 		if (automatedDiscord) DiscordClient.changePresence('Chart Editor');

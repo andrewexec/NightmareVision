@@ -134,7 +134,7 @@ class PolygonSpectogram extends MeshRender
 	
 	function realtimeVis():Void
 	{
-		if (vis.snd != null)
+		if ((vis?.snd ?? null) != null)
 		{
 			if (curTime != vis.snd.time)
 			{

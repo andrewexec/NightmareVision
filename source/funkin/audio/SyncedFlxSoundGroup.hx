@@ -4,7 +4,7 @@ import flixel.util.FlxSignal;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.sound.FlxSound;
 
-import funkin.data.Song.SwagSong;
+import funkin.data.Song;
 
 /**
  * Container of FlxSounds with some functions to make multiple tracks act as one
@@ -225,7 +225,7 @@ class PlayableSong extends VocalGroup
 	public var trackSwap:Bool = false;
 	public var splitVocals:Bool = false;
 	
-	public function populate(?data:SwagSong):Void
+	public function populate(?data:Song):Void
 	{
 		volume = 1;
 		

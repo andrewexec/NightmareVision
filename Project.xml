@@ -55,7 +55,7 @@
     <assets path='assets/embeds' rename='assets' embed="true" />
     <assets path="assets/game" rename="assets"/>
 
-    <assets path='content' embed='false' if="MODS_ALLOWED"/>
+    <assets path='content' embed='false' if="MODS_ALLOWED" unless="ASSET_REDIRECT"/>
 
     <!--OpenAL config-->    <!-- appreciate you cyn0x8 and smokey for finding this -->
     <section if="desktop">
@@ -82,7 +82,7 @@
 
     <haxelib name="funkin.vis"/>
     <haxelib name="grig.audio"/>
-    <haxelib name="json2object"/>
+    
     <haxelib name="json5hx"/>
 
     <haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED" version="1.2.4"/>
@@ -95,9 +95,8 @@
     <haxeflag name="--macro" value="addMetadata('@:build(funkin.backend.macro.FlxMacro.buildFlxCamera())', 'flixel.FlxCamera')" />
 
     <haxeflag name="--macro" value="include('funkin')" />
-    <haxeflag name="--macro" value="include('flixel.addons',true,['flixel.addons.nape.*','flixel.addons.editors.*','flixel.addons.tile.FlxRayCastTilemap'])" />
-    <haxeflag name="--macro" value="include('flixel.effects', true)"/>
-
+    <haxeflag name="--macro" value="include('flixel', true, ['flixel.addons.nape.*','flixel.addons.editors.*','flixel.addons.tile.FlxRayCastTilemap','flixel.system.macros'])" />
+    
     <haxeflag name="-dce no" />
 
     <!-- ______________________________ Haxedefines _____________________________ -->

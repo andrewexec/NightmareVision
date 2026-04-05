@@ -4,14 +4,9 @@ import funkin.data.*;
 import funkin.objects.Bopper;
 import funkin.game.shaders.RGBPalette.RGBShaderReference;
 
-class SustainSplash extends FlxSprite implements funkin.game.modchart.IModNote
+class SustainSplash extends FunkinSprite implements funkin.game.modchart.IModNote
 {
 	public var rgbShader:RGBShaderReference;
-	
-	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
-	public var skinOrigin:FlxPoint = FlxPoint.get();
-	
-	public var animOffsets:Map<String, Array<Float>> = new Map();
 	
 	public var data(get, set):Int;
 	public var noteData:Int = 0;
@@ -20,9 +15,6 @@ class SustainSplash extends FlxSprite implements funkin.game.modchart.IModNote
 	
 	private var _note:Note;
 	private var _strum:StrumNote;
-	
-	// used for transferring color shit
-	var tempColor:Array<FlxColor> = [];
 	
 	// internal thing to optimize loading frames
 	@:noCompletion var _textureLoaded:Null<String> = null;
@@ -58,42 +50,24 @@ class SustainSplash extends FlxSprite implements funkin.game.modchart.IModNote
 		}
 		
 		animation.onFinish.add((anim) -> {
-			if (anim.contains('start')) playAnim('loop$data', false, tempColor);
+			if (anim.contains('start')) playAnim('loop$data', false);
 			if (anim.contains('end')) kill();
 		});
 	}
 	
-	public function addOffset(name:String, x:Float = 0, y:Float = 0)
+	public override function playAnim(anim:String, force:Bool = false, isReversed:Bool = false, frame:Int = 0)
 	{
-		animOffsets[name] = [x, y];
+		super.playAnim(anim, force, isReversed, frame);
+		
+		centerOffsets();
+		centerOrigin();
 	}
 	
-	public function playAnim(name:String, forced:Bool = false, ?colors:Array<FlxColor>)
+	public function setColors(?colors:Array<FlxColor>):Void
 	{
-		animation.play(name, forced);
-		
-		centerOrigin();
-		centerOffsets();
-		
-		if (animOffsets.exists(name))
-		{
-			final _offsets = animOffsets.get(name);
-			offset.x += _offsets[0];
-			offset.y += _offsets[1];
-		}
-		
-		skin = NoteUtil.getSkinFromID(this.player);
-		
-		if (skin != null)
-		{
-			scale.set(skin.susSplashScale, skin.susSplashScale);
-			defScale.copyFrom(scale);
-			
-			if (skin.susSplashOrigin != null) skinOrigin.set(skin.susSplashOrigin[0], skin.susSplashOrigin[1]);
-		}
+		if (colors == null || skin == null) return;
 		
 		final sanitzedColourArray = colors ?? NoteUtil.colorToArray(skin.colors[data]);
-		tempColor = sanitzedColourArray;
 		
 		rgbShader.enabled = skin.inEngineColoring;
 		rgbShader.setColors(sanitzedColourArray);
@@ -112,27 +86,23 @@ class SustainSplash extends FlxSprite implements funkin.game.modchart.IModNote
 		
 		this.player = field?.player ?? 0;
 		
-		final skin = NoteUtil.getSkinFromID(player);
+		skin = NoteUtil.getSkinFromID(player);
+		
+		if (skin?.susSplashScale != null) scale.set(skin.susSplashScale, skin.susSplashScale);
+		
+		baseScale.copyFrom(scale);
 		
 		updateHitbox();
 		
-		playAnim('start$data', true, colourInput);
+		playAnim('start$data', true);
+		setColors(colourInput);
 		_position();
 		
 		FlxTimer.wait(time, () -> {
-			if (isPlayer && ClientPrefs.noteSplashes) playAnim('end$data', true, colourInput);
+			if (isPlayer && ClientPrefs.noteSplashes) playAnim('end$data', true);
 			else kill();
 		});
 	}
-	
-	override public function update(elapsed:Float)
-	{
-		super.update(elapsed);
-	}
-	
-	inline function get_data():Int return noteData;
-	
-	inline function set_data(v:Int):Int return noteData = v;
 	
 	function _position()
 	{
@@ -141,18 +111,13 @@ class SustainSplash extends FlxSprite implements funkin.game.modchart.IModNote
 			final _skin:NoteSkin = NoteUtil.getSkinFromID(player);
 			
 			final offsets = _skin.sustainSplashOffsets != null ? _skin.sustainSplashOffsets[data] : null;
-			final _X = (_strum.x + (offsets?.x ?? 0) * scale.x / defScale.x);
-			final _Y = (_strum.y + (offsets?.y ?? 0) * scale.y / defScale.y);
 			
-			setPosition(_X + (_strum.width - width) * .5, _Y + (_strum.height - height) * .5);
+			setPosition(_strum.x + (_strum.width - width) * .5, _strum.y + (_strum.height - height) * .5);
+			spriteOffset.set(offsets?.x, offsets?.y);
 		}
 	}
 	
-	public override function destroy():Void
-	{
-		defScale.put();
-		skinOrigin.put();
-		
-		super.destroy();
-	}
+	inline function get_data():Int return noteData;
+	
+	inline function set_data(v:Int):Int return noteData = v;
 }

@@ -287,4 +287,25 @@ class WindowUtil
 		cpp.vm.tracy.TracyProfiler.setThreadName("main");
 	}
 	#end
+	
+	/**
+	 * Resizes the windows and repositions it to be the in the position it opened in.
+	 */
+	public static function resetWindow()
+	{
+		final window = lime.app.Application.current.window;
+		
+		if (window == null) return;
+		
+		final dpiScale = (lime.system.System.getDisplay(0)?.dpi / 96) ?? 1.0;
+		
+		@:privateAccess
+		{
+			window.width = Std.int(Main.startMeta.width * dpiScale);
+			window.height = Std.int(Main.startMeta.height * dpiScale);
+		}
+		
+		window.x = Std.int((window.display.bounds.width - window.width) / 2);
+		window.y = Std.int((window.display.bounds.height - window.height) / 2);
+	}
 }

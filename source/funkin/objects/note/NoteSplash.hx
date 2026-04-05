@@ -9,16 +9,12 @@ import funkin.states.*;
 import funkin.data.NoteSkin;
 
 // @:nullSafety
-class NoteSplash extends FlxSprite implements funkin.game.modchart.IModNote
+class NoteSplash extends FunkinSprite implements funkin.game.modchart.IModNote
 {
 	/**
 	 * Shader applied to the notesplash to support custom colours
 	 */
 	public var rgbShader:RGBShaderReference;
-	
-	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
-	
-	public var animOffsets:Map<String, Array<Float>> = new Map();
 	
 	/**
 	 * The notedata of the splash
@@ -55,7 +51,7 @@ class NoteSplash extends FlxSprite implements funkin.game.modchart.IModNote
 		if (skin != null)
 		{
 			scale.set(skin.splashScale, skin.splashScale);
-			defScale.copyFrom(scale);
+			baseScale.copyFrom(scale);
 		}
 	}
 	
@@ -78,32 +74,28 @@ class NoteSplash extends FlxSprite implements funkin.game.modchart.IModNote
 		
 		updateHitbox();
 		
-		playAnim('note$data', true, colourInput);
+		playAnim('note$data', true);
+		setColors(colourInput);
 		
 		if (!field.trackNoteSplashes) _position();
 	}
 	
-	public function playAnim(name:String, forced:Bool = false, ?colors:Array<FlxColor>):Void
+	public override function playAnim(anim:String, force:Bool = false, isReversed:Bool = false, frame:Int = 0):Void
 	{
-		animation.play(name, forced);
+		super.playAnim(anim, force, isReversed, frame);
 		
-		centerOrigin();
 		centerOffsets();
+		centerOrigin();
+	}
+	
+	public function setColors(?colors:Array<FlxColor>):Void
+	{
+		if (colors == null) return;
 		
-		if (animOffsets.exists(name))
-		{
-			final _offsets = animOffsets.get(name);
-			offset.x += _offsets[0];
-			offset.y += _offsets[1];
-		}
+		final sanitzedColourArray = colors ?? NoteUtil.colorToArray(skin.colors[data]);
 		
-		if (colors != null)
-		{
-			final sanitzedColourArray = colors ?? NoteUtil.colorToArray(skin.colors[data]);
-			
-			rgbShader.enabled = skin.inEngineColoring;
-			rgbShader.setColors(sanitzedColourArray);
-		}
+		rgbShader.enabled = skin.inEngineColoring;
+		rgbShader.setColors(sanitzedColourArray);
 	}
 	
 	function loadAnims(skin:String)
@@ -125,15 +117,13 @@ class NoteSplash extends FlxSprite implements funkin.game.modchart.IModNote
 					final offsets = data[noteData].offsets;
 					
 					@:nullSafety(Off)
-					animation.addByPrefix(animName, data[noteData].xmlName, 24, false);
+					addAnimByPrefix(animName, data[noteData].xmlName, 24, false);
 					addOffset(animName, offsets[0], offsets[1]);
 				}
 		}
 		
 		_textureLoaded = skin;
 	}
-	
-	public function addOffset(name:String, x:Float = 0, y:Float = 0):Void animOffsets.set(name, [x, y]);
 	
 	override function update(elapsed:Float)
 	{
@@ -150,21 +140,13 @@ class NoteSplash extends FlxSprite implements funkin.game.modchart.IModNote
 			final _skin:NoteSkin = NoteUtil.getSkinFromID(player);
 			
 			final offsets = _skin.splashOffsets != null ? _skin.splashOffsets[data] : null;
-			final _X = (_strum.x + (offsets?.x ?? 0) * scale.x / defScale.x);
-			final _Y = (_strum.y + (offsets?.y ?? 0) * scale.y / defScale.y);
 			
-			setPosition(_X + (_strum.width - width) * .5, _Y + (_strum.height - height) * .5);
+			setPosition(_strum.x + (_strum.width - width) * .5, _strum.y + (_strum.height - height) * .5);
+			spriteOffset.set(offsets?.x, offsets?.y);
 		}
 	}
 	
 	inline function get_data():Int return noteData;
 	
 	inline function set_data(v:Int):Int return noteData = v;
-	
-	public override function destroy():Void
-	{
-		defScale.put();
-		
-		super.destroy();
-	}
 }

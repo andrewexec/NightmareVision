@@ -20,9 +20,9 @@ body:
   - type: dropdown
     id: modding
     attributes:
-      label: "Are you modding a build from source or with scripting?"
+      label: "Are you modding with the source code or with a mod folder in an already compiled build?"
       options:
-        - Scripting
+        - Content / Mod folder
         - Source
     validations:
       required: true

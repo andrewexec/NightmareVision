@@ -258,33 +258,12 @@ class ModManager implements IFlxDestroyable
 		obj.centerOrigin();
 		obj.centerOffsets();
 		
-		if (obj is SustainSplash)
-		{
-			final splash:SustainSplash = cast obj;
-			
-			splash.origin.x += splash.skinOrigin.x;
-			splash.origin.y += splash.skinOrigin.y;
-		}
-		
 		if (note != null)
 		{
 			if (note.isSustainNote) note.origin.y = note.offset.y = 0;
 			
-			note.offset.x += note.typeOffsetX;
-			note.offset.y += note.typeOffsetY;
-		}
-		
-		if (obj is IModNote)
-		{
-			final obj:IModNote = cast obj;
-			
-			final offsetsAdd = obj.animOffsets.get(obj.animation.name);
-			
-			if (offsetsAdd != null)
-			{
-				obj.offset.x += offsetsAdd[0];
-				obj.offset.y += offsetsAdd[1];
-			}
+			note.spriteOffset.x = note.typeOffsetX;
+			note.spriteOffset.y = note.typeOffsetY;
 		}
 	}
 	

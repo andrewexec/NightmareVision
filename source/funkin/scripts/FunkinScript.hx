@@ -235,8 +235,6 @@ class FunkinScript extends IrisEx implements IFlxDestroyable
 		// set flixel related stuff
 		set("FlxG", flixel.FlxG);
 		set("FlxSprite", flixel.FlxSprite);
-		set("FlxTypedGroup", flixel.group.FlxGroup.FlxTypedGroup);
-		set("FlxSpriteGroup", flixel.group.FlxSpriteGroup);
 		set("FlxCamera", extensions.flixel.FlxCameraEx);
 		set("FlxMath", flixel.math.FlxMath);
 		set("FlxTimer", flixel.util.FlxTimer);
@@ -250,6 +248,10 @@ class FunkinScript extends IrisEx implements IFlxDestroyable
 		set("FlxBackdrop", flixel.addons.display.FlxBackdrop);
 		set("FlxTiledSprite", flixel.addons.display.FlxTiledSprite);
 		set('FlxPoint', flixel.math.FlxPoint.FlxBasePoint);
+		
+		set("FlxTypedGroup", flixel.group.FlxGroup);
+		set("FlxSpriteGroup", flixel.group.FlxSpriteGroup);
+		set("FlxEmitter", flixel.effects.particles.FlxEmitter);
 		
 		set('FlxCameraFollowStyle', flixel.FlxCamera.FlxCameraFollowStyle);
 		set("FlxTextBorderStyle", flixel.text.FlxText.FlxTextBorderStyle);

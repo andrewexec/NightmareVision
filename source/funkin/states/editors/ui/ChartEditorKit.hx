@@ -14,7 +14,7 @@ class ChartEditorUI extends flixel.group.FlxSpriteContainer
 {
 	public var songDialog:SongDialog;
 	
-	public var song = PlayState.SONG;
+	public var song:funkin.data.Song;
 	public var charter:ChartEditorState;
 	
 	public function new(charter:ChartEditorState)
@@ -22,6 +22,7 @@ class ChartEditorUI extends flixel.group.FlxSpriteContainer
 		super();
 		
 		this.charter = charter;
+		this.song = ChartEditorState.song;
 		
 		songDialog = new SongDialog();
 		add(songDialog);
@@ -198,6 +199,7 @@ class ChartEditorUI extends flixel.group.FlxSpriteContainer
 		
 		// NOTES
 		
+		var _notesTabReady = false;
 		songDialog.noteTypeDropdown.onChange = function(event) {
 			charter.currentType = songDialog.noteTypeDropdown.selectedIndex;
 			
@@ -213,14 +215,18 @@ class ChartEditorUI extends flixel.group.FlxSpriteContainer
 			
 			if (changed) charter.updateGrid();
 		}
-		songDialog.strumTimeStepper.onChange = function(event) changeStrumTime(event.previousValue, event.value);
+		songDialog.strumTimeStepper.onChange = function(event)
+		{
+			if (_notesTabReady) changeStrumTime(event.previousValue, event.value);
+			FlxTimer.wait(0, function() _notesTabReady = true);
+		}
 		
 		final deinc = songDialog.strumTimeStepper.findComponent('deinc', haxe.ui.components.Button);
 		final inc = songDialog.strumTimeStepper.findComponent('inc', haxe.ui.components.Button);
 		deinc.onClick = function(event) strumTimeStep(-1);
 		inc.onClick = function(event) strumTimeStep(1);
 		
-		songDialog.sustainLengthStepper.onChange = function(event) changeSustainLength(event.previousValue, event.value);
+		songDialog.sustainLengthStepper.onChange = function(event) if (_notesTabReady) changeSustainLength(event.previousValue, event.value);
 		
 		final deinc = songDialog.sustainLengthStepper.findComponent('deinc', haxe.ui.components.Button);
 		final inc = songDialog.sustainLengthStepper.findComponent('inc', haxe.ui.components.Button);
@@ -543,9 +549,7 @@ class ChartEditorUI extends flixel.group.FlxSpriteContainer
 			note[0] = Conductor.beatToSeconds((mod < 0 ? Math.ceil : Math.floor)((beat + (step * snapLeniency) * mod) / step) * step);
 		}
 		
-		songDialog.strumTimeStepper.pauseEvent('change'); // thakn u data this keeps me sane
-		songDialog.strumTimeStepper.value = Lambda.fold(charter.curSelectedNotes, (note, r) -> Math.min(note[0], r), Math.POSITIVE_INFINITY);
-		songDialog.strumTimeStepper.resumeEvent('change', true);
+		songDialog.strumTimeStepper.changeSilent(Lambda.fold(charter.curSelectedNotes, (note, r) -> Math.min(note[0], r), Math.POSITIVE_INFINITY));
 		
 		charter.updateGrid();
 	}
@@ -568,9 +572,7 @@ class ChartEditorUI extends flixel.group.FlxSpriteContainer
 			note[2] = (Conductor.beatToSeconds((mod < 0 ? Math.ceil : Math.floor)((beat + (step * snapLeniency) * mod) / step) * step) - note[0]);
 		}
 		
-		songDialog.sustainLengthStepper.pauseEvent('change');
-		songDialog.sustainLengthStepper.value = Lambda.fold(notes, (note, r) -> Math.max(note[2], r), 0);
-		songDialog.sustainLengthStepper.resumeEvent('change', true);
+		songDialog.sustainLengthStepper.changeSilent(Lambda.fold(notes, (note, r) -> Math.max(note[2], r), 0));
 		
 		charter.updateGrid();
 	}

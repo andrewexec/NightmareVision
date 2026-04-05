@@ -5,7 +5,7 @@
             {
                 "name": "flixel",
                 "link": "https://github.com/FunkinCrew/flixel",
-                "branch": "f7b94eebf7dbb452a929d0c67ab31a9cbd71d3a0"
+                "branch": "622bb65e7f49f0e1a03826b6593369d3ad5e54fa"
             },
             {
                 "name": "flixel-addons",
@@ -19,7 +19,7 @@
             {
                 "name": "flixel-animate",
                 "link": "https://github.com/MaybeMaru/flixel-animate",
-                "branch": "5decd2e91dfdb62c235aaa344303d9b2d77c83d5"
+                "branch": "e948efd84be03c110fe89051b4a59b3be59adcb7"
             },
             {
                 "name": "hscript",
@@ -37,7 +37,7 @@
             {
                 "name": "hxcpp",
                 "link": "https://github.com/FunkinCrew/hxcpp",
-                "branch": "450d112e50acff57b1bc9d584dcf1374c9e33995"
+                "branch": "485b5e9defb3b8a8548a27452f73d75a0b040f22"
             },
             {
                 "name": "hxvlc",
@@ -46,12 +46,12 @@
             {
                 "name": "lime",
                 "link": "https://github.com/FunkinCrew/lime",
-                "branch": "0cced105f742a7e36f88e21e57fc539209fd4087"
+                "branch": "8d5555df83e208c0bab3877ed89cff6cf8906227"
             },
             {
                 "name": "openfl",
                 "link": "https://github.com/FunkinCrew/openfl",
-                "branch": "88534506595a32c3f02b21b3987e789a24074ae7"
+                "branch": "a85b45f21c7e1a4c19663a193bf4ea961faf0dfa"
             },
             {
                 "name": "hxdiscord_rpc",
@@ -60,12 +60,12 @@
             {
                 "name": "haxeui-flixel",
                 "link": "https://github.com/haxeui/haxeui-flixel",
-                "branch": "b899a4c7d7318c5ff2b1bb645fbc73728fad1ac9"
+                "branch": "100f2c96beab619cfe72c567a058c41c71e3e998"
             },
             {
                 "name": "haxeui-core",
-                "link": "https://github.com/haxeui/haxeui-core",
-                "branch": "99d5d035e7120ce027256b117a25625c53b488dc"
+                "link": "https://github.com/FunkinCrew/haxeui-core",
+                "branch": "09f2512564b45e92229e21433e6dd482391f7b7d"
             },
             {
                 "name": "moonchart",

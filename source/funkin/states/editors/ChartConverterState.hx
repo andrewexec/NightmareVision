@@ -11,8 +11,6 @@ import moonchart.formats.fnf.legacy.FNFLegacy;
 import moonchart.formats.BasicFormat.FormatDifficulty;
 import moonchart.formats.fnf.FNFVSlice;
 
-import extensions.openfl.FileReferenceEx;
-
 import openfl.net.FileFilter;
 
 import moonchart.formats.fnf.FNFCodename;
@@ -33,8 +31,6 @@ class ChartConverterState extends MusicBeatState
 	var descriptionBG:FlxSprite;
 	var description:FlxText;
 	
-	var fileRef = new FileReferenceEx();
-	
 	var bgColour:FlxColor = 0xFF674B6C;
 	
 	var curSelection:Int = 0;
@@ -46,10 +42,6 @@ class ChartConverterState extends MusicBeatState
 		super.create();
 		
 		persistentUpdate = true;
-		
-		fileRef.onFileCancel = () -> {
-			Logger.log('File selecting was canceled.', WARN, true);
-		}
 		
 		bg = new FlxSprite(Paths.image('menuDesat'));
 		bg.scrollFactor.set();
@@ -151,7 +143,8 @@ class ChartConverterState extends MusicBeatState
 		switch (curSelection)
 		{
 			case 0: // vslice
-				fileRef.onFileSelectMultiple = (files) -> {
+				function onSelect(files:Array<String>)
+				{
 					// this is a bit jank bnut itll do
 					
 					var pathToChart:Null<String> = null;
@@ -204,11 +197,13 @@ class ChartConverterState extends MusicBeatState
 						if (pathToMeta == null) Logger.log('Chart meta was not provided!', ERROR, true);
 					}
 				}
-				fileRef.browseForFile({openStyle: OPEN_MULTIPLE, typeFilter: [new FileFilter('json', 'json')]});
+				
+				FileUtil.browseForMultipleFiles({typeFilter: [new FileFilter('json', 'json')]}, onSelect, onCancel);
 				
 			case 1: // cne
 			
-				fileRef.onFileSelectMultiple = (files) -> {
+				function onSelect(files:Array<String>)
+				{
 					var pathToChart:Null<String> = null;
 					
 					var pathToMeta:Null<String> = null;
@@ -249,10 +244,12 @@ class ChartConverterState extends MusicBeatState
 						if (pathToMeta == null) Logger.log('Chart meta was not provided!', ERROR, true);
 					}
 				}
-				fileRef.browseForFile({openStyle: OPEN_MULTIPLE, typeFilter: [new FileFilter('json', 'json')]});
+				
+				FileUtil.browseForMultipleFiles({typeFilter: [new FileFilter('json', 'json')]}, onSelect, onCancel);
 				
 			case 2: // psych 1.0
-				fileRef.onFileSelect = (path) -> {
+				function onSelect(path:String)
+				{
 					try
 					{
 						if (!path.endsWith('.json')) throw "Did not recieve a Json!";
@@ -266,7 +263,8 @@ class ChartConverterState extends MusicBeatState
 						showError(e);
 					}
 				}
-				fileRef.browseForFile({openStyle: OPEN, typeFilter: [new FileFilter('json', 'json')]});
+				
+				FileUtil.browseForFile({typeFilter: [new FileFilter('json', 'json')]}, onSelect, onCancel);
 		}
 	}
 	
@@ -286,7 +284,11 @@ class ChartConverterState extends MusicBeatState
 	
 	override function destroy()
 	{
-		fileRef?.destroy();
 		super.destroy();
+	}
+	
+	function onCancel()
+	{
+		Logger.log('File selecting was canceled.', WARN, true);
 	}
 }

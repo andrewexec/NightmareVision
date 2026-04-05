@@ -1,6 +1,6 @@
 package funkin.backend;
 
-import funkin.data.Song.SwagSong;
+import funkin.data.Song;
 
 typedef BPMChangeEvent =
 {
@@ -121,7 +121,7 @@ class Conductor
 		return Math.floor(getBeat(time));
 	}
 	
-	public static function mapBPMChanges(song:SwagSong)
+	public static function mapBPMChanges(song:Song)
 	{
 		bpmChangeMap.resize(0);
 		bpmChangeMap.push({stepTime: 0, songTime: 0, bpm: song.bpm, stepCrotchet: calculateCrochet(song.bpm) / 4});
@@ -150,7 +150,7 @@ class Conductor
 		}
 	}
 	
-	inline static function getSectionBeats(song:SwagSong, section:Int)
+	inline static function getSectionBeats(song:Song, section:Int)
 	{
 		return (song.notes[section]?.sectionBeats ?? 4);
 	}

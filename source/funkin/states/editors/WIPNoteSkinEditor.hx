@@ -12,8 +12,6 @@ import haxe.ui.backend.flixel.UIState;
 import openfl.events.Event;
 import openfl.events.KeyboardEvent;
 
-import extensions.openfl.FileReferenceEx;
-
 import flixel.group.FlxContainer;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.keyboard.FlxKey;
@@ -691,13 +689,10 @@ class WIPNoteSkinEditor extends UIState
 		FlxG.camera.zoom = FlxMath.bound(FlxG.camera.zoom, 0.1, 6);
 	}
 	
-	var _fileReference:Null<FileReferenceEx> = null;
-	
 	function saveSkinToFile()
 	{
 		inline function getSusSplashOrigin() return [0, 0];
 		
-		if (_fileReference != null) return;
 		var json =
 			{
 				"noteTexture": skin.noteTexture,
@@ -730,35 +725,21 @@ class WIPNoteSkinEditor extends UIState
 				"arrowRGB": skin.colors
 			}
 		final dataToSave:String = Json.stringify(json, "\t");
+		
 		if (dataToSave.length > 0)
 		{
-			_fileReference = new FileReferenceEx(); // maybe do smth about this idk
-			_fileReference.addEventListener(Event.SELECT, onFileSaveComplete);
-			_fileReference.addEventListener(Event.CANCEL, onFileSaveCancel);
-			_fileReference.save(dataToSave, '${uiElements.toolBar.skinName.value}.json');
+			FileUtil.saveFile(dataToSave, '${uiElements.toolBar.skinName.value}.json', onFileSaveComplete, onFileSaveCancel);
 		}
 	}
 	
-	function cleanUpFileReference()
+	function onFileSaveComplete(str:String)
 	{
-		if (_fileReference == null) return;
-		_fileReference.removeEventListener(Event.SELECT, onFileSaveComplete);
-		_fileReference.removeEventListener(Event.CANCEL, onFileSaveCancel);
-		_fileReference = null;
-	}
-	
-	function onFileSaveComplete(_)
-	{
-		if (_fileReference == null) return;
-		cleanUpFileReference();
 		ToolKitUtils.makeNotification('Skin File Saving', 'Skin was successfully saved.', Success);
 		FlxG.sound.play(Paths.sound('ui/success'));
 	}
 	
-	function onFileSaveCancel(_)
+	function onFileSaveCancel()
 	{
-		if (_fileReference == null) return;
-		cleanUpFileReference();
 		ToolKitUtils.makeNotification('Skin File Saving', 'Skin saving was canceled.', Warning);
 		FlxG.sound.play(Paths.sound('ui/warn'));
 	}
@@ -803,7 +784,7 @@ class WIPNoteSkinEditor extends UIState
 	{
 		if (spr != null)
 		{
-			spr.playAnim(anim, true, null);
+			spr.playAnim(anim, true);
 			spr.resetAnim = time;
 		}
 	}
@@ -815,7 +796,7 @@ class WIPNoteSkinEditor extends UIState
 		{
 			note.addOffset(name, offsets[0], offsets[1]);
 			skin.data.receptorAnimations[note.noteData][getAnimIndex(name)].offsets = offsets;
-			note.playAnim(name, true, null);
+			note.playAnim(name, true);
 		}
 	}
 	

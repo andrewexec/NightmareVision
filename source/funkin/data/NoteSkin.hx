@@ -56,9 +56,6 @@ class NoteSkin implements IFlxDestroyable
 	public var splashScale:Float = 1;
 	public var susSplashScale:Float = 1;
 	
-	// other
-	public var susSplashOrigin:Array<Float> = [];
-	
 	// coloring
 	public var inEngineColoring:Bool = true;
 	public var colors:Array<ColorList> = [];
@@ -109,8 +106,6 @@ class NoteSkin implements IFlxDestroyable
 		splashScale = data.splashScale;
 		susSplashScale = data.susSplashScale;
 		
-		susSplashOrigin = data.susSplashOrigin;
-		
 		inEngineColoring = data.inGameColoring;
 		colors = data.arrowRGB;
 	}
@@ -138,6 +133,7 @@ class NoteSkin implements IFlxDestroyable
 		{
 			for (i in input)
 			{
+				i.offsets ??= [0, 0];
 				i.looping ??= false;
 				i.fps ??= 24;
 			}
@@ -207,8 +203,6 @@ typedef NoteSkinData =
 	?noteScale:Float,
 	?splashScale:Float,
 	?susSplashScale:Float,
-	
-	?susSplashOrigin:Array<Float>,
 	
 	?inGameColoring:Bool,
 	?arrowRGB:Array<ColorList>

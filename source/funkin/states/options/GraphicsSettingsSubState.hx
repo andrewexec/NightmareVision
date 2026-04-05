@@ -49,6 +49,11 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		option.displayFormat = '%v FPS';
 		option.onChange = onChangeFramerate;
 		
+		var option:Option = new Option('Unlocked Framerate', "Pretty self explanatory, isn't it?", 'unlockedFramerate', 'bool', false);
+		addOption(option);
+		
+		option.onChange = onChangeFramerate;
+		
 		super();
 	}
 	
@@ -67,15 +72,6 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 	
 	function onChangeFramerate()
 	{
-		if (ClientPrefs.framerate > FlxG.drawFramerate)
-		{
-			FlxG.updateFramerate = ClientPrefs.framerate;
-			FlxG.drawFramerate = ClientPrefs.framerate;
-		}
-		else
-		{
-			FlxG.drawFramerate = ClientPrefs.framerate;
-			FlxG.updateFramerate = ClientPrefs.framerate;
-		}
+		ClientPrefs.changeFps(ClientPrefs.framerate);
 	}
 }

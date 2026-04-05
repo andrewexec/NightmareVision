@@ -1,9 +1,8 @@
 package funkin.data;
 
 import funkin.backend.Difficulty;
-import funkin.data.Song.SwagSection;
-import funkin.data.Song.SwagSong;
 import funkin.data.StageData;
+import funkin.data.Song;
 
 import haxe.Json;
 
@@ -25,9 +24,9 @@ class Chart
 	/**
 	 * Attempts to get a songs data from a given path
 	 * @param path 
-	 * @return SwagSong
+	 * @return Song
 	 */
-	public static function fromPath(path:String):SwagSong
+	public static function fromPath(path:String):Song
 	{
 		path = Paths.sanitize(path);
 		if (!FunkinAssets.exists(path))
@@ -42,9 +41,9 @@ class Chart
 	 * Attempts to get a songs data from song name
 	 * @param songName 
 	 * @param difficulty 
-	 * @return SwagSong
+	 * @return Song
 	 */
-	public static function fromSong(songName:String, difficulty:Int = -1):SwagSong
+	public static function fromSong(songName:String, difficulty:Int = -1):Song
 	{
 		songName = Paths.sanitize(songName);
 		
@@ -58,7 +57,7 @@ class Chart
 		return fromData(FunkinAssets.parseJson(FunkinAssets.getContent(path)));
 	}
 	
-	public static function fromData(data:Dynamic):SwagSong
+	public static function fromData(data:Dynamic):Song
 	{
 		if (data == null)
 		{
@@ -114,7 +113,7 @@ class Chart
 				songJson.arrowSkins.push('default');
 		}
 		
-		final sectionsData:Array<SwagSection> = songJson.notes;
+		final sectionsData:Array<SongSection> = songJson.notes;
 		
 		if (songJson.events == null)
 		{
@@ -124,7 +123,7 @@ class Chart
 			{
 				for (secNum in 0...songJson.notes.length)
 				{
-					var sec:SwagSection = songJson.notes[secNum];
+					var sec:SongSection = songJson.notes[secNum];
 					
 					var i:Int = 0;
 					var notes:Array<Dynamic> = sec.sectionNotes;

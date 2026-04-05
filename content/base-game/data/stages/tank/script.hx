@@ -17,7 +17,7 @@ var boppers:Array<FlxSprite> = [];
 
 // pico stuff
 var picoAnims:Array<CrowdAnim> = [];
-var chart:SONG.SwagSong = null;
+var chart:Song = null;
 
 typedef CrowdAnim =
 {

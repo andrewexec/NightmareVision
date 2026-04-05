@@ -99,7 +99,7 @@ class Character extends Bopper
 	/**
 	 * Array of all ghosts
 	 */
-	public var doubleGhosts:Array<FlxAnimate> = [];
+	public var doubleGhosts:Array<FunkinSprite> = [];
 	
 	/**
 	 * Array of all ghosts tweens
@@ -159,8 +159,9 @@ class Character extends Bopper
 	{
 		for (i in 0...4)
 		{
-			final ghost = new FlxAnimate();
+			final ghost = new FunkinSprite();
 			ghost.visible = false;
+			ghost.useRenderTexture = true;
 			ghost.antialiasing = true;
 			ghost.alpha = ghostAlpha;
 			doubleGhosts.push(ghost);
@@ -334,27 +335,6 @@ class Character extends Bopper
 		animToPlay += animSuffix;
 		
 		super.playAnim(animToPlay, isForced, isReversed, frame);
-		
-		if (!debugMode
-			&& ((isPlayer && flipX == originalFlipX) || (!isPlayer && flipX != originalFlipX))) // rewrite this condition later maybe
-		{
-			var appliedOffset = offset.x;
-			
-			final scaleFactor = scalableOffsets ? scale.x : 1.0;
-			
-			offset.x = ((frameWidth * scaleFactor) - this.width) - appliedOffset;
-		}
-		
-		if (flipY) // maybe a corrected offsets var
-		{
-			var appliedOffset = offset.y;
-			
-			final scaleFactor = scalableOffsets ? scale.y : 1.0;
-			
-			offset.y = ((frameHeight * scaleFactor) - this.height) - appliedOffset;
-		}
-		
-		offset.degrees += angle;
 	}
 	
 	override function onBeatHit(beat:Int)
@@ -382,7 +362,7 @@ class Character extends Bopper
 	
 	public function playGhostAnim(ghostID = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0)
 	{
-		var ghost:FlxSprite = doubleGhosts[ghostID];
+		var ghost:FunkinSprite = doubleGhosts[ghostID];
 		ghost.scale.copyFrom(scale);
 		ghost.frames = frames;
 		ghost.animation.copyFrom(animation);
@@ -432,7 +412,7 @@ class Character extends Bopper
 		if (animOffsets.exists(animName))
 		{
 			final daOffset = animOffsets.get(animName);
-			ghost.offset.set(daOffset[0] * scale.x, daOffset[1] * scale.y);
+			ghost.animOffset.set(daOffset[0] * scale.x, daOffset[1] * scale.y);
 		}
 	}
 	

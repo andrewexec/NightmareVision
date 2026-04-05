@@ -36,6 +36,8 @@ class ClientPrefs
 	
 	@saveVar public static var shaders:Bool = true;
 	
+	@saveVar public static var unlockedFramerate:Bool = false;
+	
 	@saveVar public static var framerate:Int = 60;
 	
 	// visuals ------------------------------------------------------------------------//
@@ -289,16 +291,7 @@ class ClientPrefs
 		
 		if (FlxG.save.data.framerate == null) framerate = Std.int(FlxMath.bound(FlxG.stage.application.window.displayMode.refreshRate, 60, 240));
 		
-		if (framerate > FlxG.drawFramerate)
-		{
-			FlxG.updateFramerate = framerate;
-			FlxG.drawFramerate = framerate;
-		}
-		else
-		{
-			FlxG.drawFramerate = framerate;
-			FlxG.updateFramerate = framerate;
-		}
+		changeFps(framerate);
 		
 		var save:FlxSave = new FlxSave();
 		save.bind('controls_v2');
@@ -309,6 +302,22 @@ class ClientPrefs
 		reloadControls();
 		
 		save = FlxDestroyUtil.destroy(save);
+	}
+	
+	public static function changeFps(fps:Int = 60)
+	{
+		fps = unlockedFramerate ? 0 : Std.int(FlxMath.bound(fps, 60, 240));
+		
+		if (fps > FlxG.drawFramerate)
+		{
+			FlxG.updateFramerate = fps;
+			FlxG.drawFramerate = fps;
+		}
+		else
+		{
+			FlxG.drawFramerate = fps;
+			FlxG.updateFramerate = fps;
+		}
 	}
 	
 	inline public static function getGameplaySetting(name:String, defaultValue:Dynamic):Dynamic

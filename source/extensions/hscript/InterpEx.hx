@@ -278,7 +278,7 @@ class InterpEx extends crowplexus.hscript.Interp
 							r;
 							
 						case EVar(field, _, e) if (depth == 0):
-							final r = expr(e);
+							final r = (e != null ? expr(e) : null);
 							sharedFields.set(field, r);
 							r;
 							

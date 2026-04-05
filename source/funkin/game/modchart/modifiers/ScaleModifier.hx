@@ -22,7 +22,7 @@ class ScaleModifier extends NoteModifier
 		
 		if (isSus)
 		{
-			scale.y = sprite.defScale.y;
+			scale.y = sprite.baseScale.y;
 		}
 		else
 		{
@@ -52,13 +52,13 @@ class ScaleModifier extends NoteModifier
 		{
 			var scaleX = getSubmodValue('${prefix}ScaleX', player);
 			var scaleY = getSubmodValue('${prefix}ScaleY', player);
-			if (scaleX == 0) scaleX = obj.defScale.x;
-			if (scaleY == 0) scaleY = obj.defScale.y;
+			if (scaleX == 0) scaleX = obj.baseScale.x;
+			if (scaleY == 0) scaleY = obj.baseScale.y;
 			
 			return getScale(prefix, obj, FlxPoint.weak(scaleX, scaleY), obj.noteData, player);
 		}
 		
-		return getScale(prefix, obj, FlxPoint.weak(obj.defScale.x, obj.defScale.y), obj.noteData, player);
+		return getScale(prefix, obj, FlxPoint.weak(obj.baseScale.x, obj.baseScale.y), obj.noteData, player);
 	}
 	
 	override function shouldExecute(player:Int, val:Float) return true;
