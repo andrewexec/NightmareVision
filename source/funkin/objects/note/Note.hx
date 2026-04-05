@@ -83,7 +83,6 @@ class Note extends FunkinSprite implements funkin.game.modchart.IModNote
 	
 	var queueNote:Null<QueueNote> = null;
 	
-	public var row:Int = 0;
 	public var lane:Int = 0;
 	
 	public var noteScript:Null<FunkinScript> = null;

@@ -170,8 +170,6 @@ class PlayState extends MusicBeatState
 	
 	public var currentSV:SpeedEvent = {};
 	
-	public var noteRows:Array<Array<Array<Note>>> = [[], []];
-	
 	public var variables:Map<String, Dynamic> = new Map();
 	
 	/**
@@ -1345,8 +1343,6 @@ class PlayState extends MusicBeatState
 		}
 		
 		var events = getEventsDirect();
-		
-		noteRows = [for (i in 0...songData.lanes) []];
 		
 		#if debug
 		var cpuTime = Sys.time();
