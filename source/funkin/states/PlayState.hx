@@ -652,13 +652,10 @@ class PlayState extends MusicBeatState
 			Logger.log('script: ' + stage.script.name + ' intialized');
 		}
 		
-		if (scripts.call("onAddSpriteGroups", []) != ScriptConstants.STOP_FUNC)
-		{
-			add(stage);
-			stage.add(gfGroup);
-			stage.add(dadGroup);
-			stage.add(boyfriendGroup);
-		}
+		add(stage);
+		stage.add(gfGroup);
+		stage.add(dadGroup);
+		stage.add(boyfriendGroup);
 		
 		inline function initAllScriptsInDirectory(directory:String)
 		{
@@ -778,7 +775,7 @@ class PlayState extends MusicBeatState
 		initAllScriptsInDirectory('songs/${Paths.sanitize(SONG.song)}/');
 		initAllScriptsInDirectory('songs/${Paths.sanitize(SONG.song)}/scripts/');
 		
-		scripts.call('preNoteGeneration', []);
+		scripts.call('preNoteGeneration');
 		
 		if (genNotesBeforeCountdown) generatePlayfields();
 		generateSong(SONG.song);
@@ -1019,69 +1016,71 @@ class PlayState extends MusicBeatState
 		
 		final ret:Dynamic = scripts.call('onStartCountdown', []);
 		
-		if (ret != ScriptConstants.STOP_FUNC)
+		if (scripts.event("onStartCountdown", new BasicEvent()).cancelled)
 		{
-			// if its not 0 we can assume this was manually triggered
-			if (!genNotesBeforeCountdown) generatePlayfields();
-			
-			new FlxTimer().start(countdownDelay, (t:FlxTimer) -> {
-				startedCountdown = true;
-				Conductor.songPosition = 0;
-				Conductor.songPosition -= Conductor.crotchet * 5;
-				scripts.call('onCountdownStarted', []);
-				
-				var swagCounter:Int = 0;
-				
-				if (startOnTime < 0) startOnTime = 0;
-				
-				if (startOnTime > 0)
-				{
-					clearNotesBefore(startOnTime);
-					setSongTime(startOnTime - 350);
-					return;
-				}
-				else if (skipCountdown)
-				{
-					setSongTime(0);
-					return;
-				}
-				
-				startTimer = new FlxTimer().start((Conductor.crotchet / 1000) / playbackRate, function(tmr:FlxTimer) {
-					handleBoppers(tmr.loopsLeft);
-					
-					var introAlts:Array<String> = ['ready', 'set', 'go'];
-					var antialias:Bool = ClientPrefs.globalAntialiasing;
-					
-					switch (swagCounter)
-					{
-						case 0:
-							if (countdownSounds) FlxG.sound.play(Paths.sound('intro3' + introSoundsSuffix), 0.6);
-						case 1:
-							countdownReady = makeCountdownSprite(introAlts[0]);
-							insert(members.indexOf(notes), countdownReady);
-							
-							if (countdownSounds) FlxG.sound.play(Paths.sound('intro2' + introSoundsSuffix), 0.6);
-						case 2:
-							countdownSet = makeCountdownSprite(introAlts[1]);
-							insert(members.indexOf(notes), countdownSet);
-							
-							if (countdownSounds) FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
-						case 3:
-							countdownGo = makeCountdownSprite(introAlts[2]);
-							
-							insert(members.indexOf(notes), countdownGo);
-							
-							if (countdownSounds) FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
-							
-						case 4:
-					}
-					
-					scripts.call('onCountdownTick', [swagCounter]);
-					
-					swagCounter += 1;
-				}, 5);
-			});
+			return;
 		}
+		
+		// if its not 0 we can assume this was manually triggered
+		if (!genNotesBeforeCountdown) generatePlayfields();
+		
+		new FlxTimer().start(countdownDelay, (t:FlxTimer) -> {
+			startedCountdown = true;
+			Conductor.songPosition = 0;
+			Conductor.songPosition -= Conductor.crotchet * 5;
+			scripts.call('onCountdownStarted', []);
+			
+			var swagCounter:Int = 0;
+			
+			if (startOnTime < 0) startOnTime = 0;
+			
+			if (startOnTime > 0)
+			{
+				clearNotesBefore(startOnTime);
+				setSongTime(startOnTime - 350);
+				return;
+			}
+			else if (skipCountdown)
+			{
+				setSongTime(0);
+				return;
+			}
+			
+			startTimer = new FlxTimer().start((Conductor.crotchet / 1000) / playbackRate, function(tmr:FlxTimer) {
+				handleBoppers(tmr.loopsLeft);
+				
+				var introAlts:Array<String> = ['ready', 'set', 'go'];
+				var antialias:Bool = ClientPrefs.globalAntialiasing;
+				
+				switch (swagCounter)
+				{
+					case 0:
+						if (countdownSounds) FlxG.sound.play(Paths.sound('intro3' + introSoundsSuffix), 0.6);
+					case 1:
+						countdownReady = makeCountdownSprite(introAlts[0]);
+						insert(members.indexOf(notes), countdownReady);
+						
+						if (countdownSounds) FlxG.sound.play(Paths.sound('intro2' + introSoundsSuffix), 0.6);
+					case 2:
+						countdownSet = makeCountdownSprite(introAlts[1]);
+						insert(members.indexOf(notes), countdownSet);
+						
+						if (countdownSounds) FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
+					case 3:
+						countdownGo = makeCountdownSprite(introAlts[2]);
+						
+						insert(members.indexOf(notes), countdownGo);
+						
+						if (countdownSounds) FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
+						
+					case 4:
+				}
+				
+				scripts.call('onCountdownTick', [swagCounter]);
+				
+				swagCounter += 1;
+			}, 5);
+		});
 	}
 	
 	function makeCountdownSprite(path:String):FlxSprite
@@ -1460,7 +1459,6 @@ class PlayState extends MusicBeatState
 				eventsPushed.push(eventName);
 			}
 			
-			event.strumTime -= eventNoteEarlyTrigger(event);
 			eventNotes.push(event);
 			eventPushed(event);
 		}
@@ -1573,23 +1571,6 @@ class PlayState extends MusicBeatState
 			default:
 				callEventScript(event.event, 'onFirstPush', [event]);
 		}
-	}
-	
-	function eventNoteEarlyTrigger(event:EventNote):Float
-	{
-		var returnValue:Dynamic = scripts.call('eventEarlyTrigger', [event.event, event.value1, event.value2]);
-		if (returnValue != ScriptConstants.CONTINUE_FUNC) return returnValue;
-		
-		returnValue = callEventScript(event.event, 'offsetStrumTime', [event]);
-		if (returnValue != ScriptConstants.CONTINUE_FUNC) return returnValue;
-		
-		switch (event.event)
-		{
-			case 'Kill Henchmen': // Better timing so that the kill sound matches the beat intended
-				return 280; // Plays 280ms before the actual position
-		}
-		
-		return 0;
 	}
 	
 	override function openSubState(SubState:FlxSubState):Void
