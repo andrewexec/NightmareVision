@@ -75,7 +75,7 @@ class TitleState extends MusicBeatState
 		
 		Conductor.bpm = 102;
 		
-		if (scriptGroup.call('onStartIntro') != ScriptConstants.STOP_FUNC)
+		if (!scriptGroup.event('onStartIntro', new BasicEvent()).cancelled)
 		{
 			swagShader = new ColorSwap();
 			
@@ -134,7 +134,7 @@ class TitleState extends MusicBeatState
 		
 		if (skippedIntro)
 		{
-			if (pressedEnter && scriptGroup.call('onEnter', []) != ScriptConstants.STOP_FUNC && !transitioning)
+			if (pressedEnter && !scriptGroup.event('onEnter', new BasicEvent()).cancelled && !transitioning)
 			{
 				FlxG.camera.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
 				transitioning = true;
@@ -285,7 +285,7 @@ class TitleState extends MusicBeatState
 	
 	public function skipIntro():Void
 	{
-		if (scriptGroup.call('onSkipIntro', []) != ScriptConstants.STOP_FUNC && !skippedIntro)
+		if (!scriptGroup.event('onSkipIntro', new BasicEvent()).cancelled && !skippedIntro)
 		{
 			ngSpr?.kill();
 			textGroup?.kill();

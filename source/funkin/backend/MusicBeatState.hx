@@ -42,7 +42,8 @@ class MusicBeatState extends FlxUIState
 	
 	private var curDecStep:Float = 0;
 	private var curDecBeat:Float = 0;
-	private var controls(get, never):Controls;
+	
+	final controls:Controls = Controls.instance;
 	
 	// script related vars
 	public var scripted:Bool = false;
@@ -83,8 +84,6 @@ class MusicBeatState extends FlxUIState
 		
 		return scripted;
 	}
-	
-	inline function get_controls():Controls return Controls.instance;
 	
 	override function create()
 	{
