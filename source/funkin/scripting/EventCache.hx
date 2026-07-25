@@ -24,7 +24,7 @@ final class EventCache
 		var c:Class<BasicEvent> = cast cl;
 		
 		var index = eventKeys.indexOf(c);
-		if (index < 0)
+		if (index == -1)
 		{
 			eventKeys.push(c);
 			var ret = Type.createInstance(c, []);

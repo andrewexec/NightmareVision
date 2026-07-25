@@ -66,9 +66,14 @@ class ModPlugin extends FlxTypedGroup<FlxBasic>
 		return script.call(func, args).returnValue;
 	}
 	
-	public function callOnPlugins(func:String, ?args:Array<Dynamic>):Void
+	public function call(func:String, ?args:Array<Dynamic>):Void
 	{
 		scripts.call(func, args);
+	}
+	
+	public function event<T:BasicEvent>(func:String, event:T, immutablePropogation:Bool = false):T
+	{
+		return scripts.event(func, event, immutablePropogation);
 	}
 	
 	public function populate()
@@ -100,11 +105,11 @@ class ModPlugin extends FlxTypedGroup<FlxBasic>
 	
 	public function onStateSwitchPost():Void
 	{
-		callOnPlugins('onStateSwitchPost', [FlxG.state]);
+		call('onStateSwitchPost', [FlxG.state]);
 	}
 	
 	public function onStateSwitch():Void
 	{
-		callOnPlugins('onStateSwitch', [FlxG.state]);
+		call('onStateSwitch', [FlxG.state]);
 	}
 }

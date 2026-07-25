@@ -147,11 +147,11 @@ class MainMenuState extends MusicBeatState
 			
 			if (controls.ACCEPT)
 			{
-				if (dispatchEvent("onSelect", new BasicEvent()).cancelled)
+				if (dispatchEvent("onSelect", EventCache.get(BasicEvent).basicRecycle()).cancelled)
 				{
 					super.update(elapsed);
 					
-					scriptGroup.call('onUpdatePost', [elapsed]);
+					dispatchEvent('onUpdatePost', EventCache.get(UpdateEvent).recycle(elapsed), true);
 					
 					return;
 				}
@@ -189,7 +189,7 @@ class MainMenuState extends MusicBeatState
 		
 		super.update(elapsed);
 		
-		scriptGroup.call('onUpdatePost', [elapsed]);
+		dispatchEvent('onUpdatePost', EventCache.get(UpdateEvent).recycle(elapsed), true);
 	}
 	
 	function changeSelection(diff:Int = 0)
@@ -197,7 +197,7 @@ class MainMenuState extends MusicBeatState
 		final lastCurSel = curSelected;
 		curSelected = FlxMath.wrap(curSelected + diff, 0, menuItems.length - 1);
 		
-		if (dispatchEvent("onChangeSelection", new BasicEvent()).cancelled)
+		if (dispatchEvent("onChangeSelection", EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
 			return;
 		}

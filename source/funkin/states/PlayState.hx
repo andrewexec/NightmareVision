@@ -1684,8 +1684,6 @@ class PlayState extends MusicBeatState
 		
 		if (generatedMusic && !endingSong && !isCameraOnForcedPos) moveCameraSection();
 		
-		dispatchEvent('onUpdate', EventCache.get(UpdateEvent).recycle(elapsed), true);
-		
 		super.update(elapsed);
 		input.update();
 		
@@ -2568,6 +2566,12 @@ class PlayState extends MusicBeatState
 	
 	public function endSong():Void
 	{
+		var event = dispatchEvent('onEndSong', EventCache.get(ExitSongEvent).recycle(null));
+		if (event.cancelled)
+		{
+			return;
+		}
+		
 		// Should kill you if you tried to cheat
 		if (!startingSong)
 		{
@@ -2590,7 +2594,7 @@ class PlayState extends MusicBeatState
 		deathCounter = 0;
 		seenCutscene = false;
 		
-		if (!dispatchEvent('onEndSong', EventCache.get(BasicEvent).basicRecycle()).cancelled && !transitioning)
+		if (!transitioning)
 		{
 			playbackRate = 1;
 			var percent:Float = ratingPercent;

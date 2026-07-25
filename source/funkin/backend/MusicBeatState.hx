@@ -10,7 +10,6 @@ import flixel.addons.ui.FlxUIState;
 import flixel.addons.transition.FlxTransitionSprite.TransitionStatus;
 
 import funkin.backend.BaseTransitionState;
-import funkin.states.transitions.SwipeTransition;
 import funkin.data.*;
 import funkin.scripts.*;
 import funkin.input.Controls;
@@ -96,7 +95,7 @@ class MusicBeatState extends FlxUIState
 		
 		FlxTransitionableState.skipNextTransOut = false;
 		
-		ModPlugin.instance.callOnPlugins('onStateCreate');
+		ModPlugin.instance.call('onStateCreate');
 	}
 	
 	/**
@@ -126,15 +125,18 @@ class MusicBeatState extends FlxUIState
 				
 				updateBeat();
 				
-				if (curStep >= 0) stepHit();
+				if (curStep >= 0)
+				{
+					stepHit();
+					if (curStep % 4 == 0) beatHit();
+				}
 			}
 			
 			if (PlayState.SONG != null) updateSection();
 		}
 		else if (PlayState.SONG != null) rollbackSection();
 		
-		final scriptArgs = [elapsed];
-		scriptGroup.call('onUpdate', scriptArgs);
+		dispatchEvent('onUpdate', EventCache.get(UpdateEvent).recycle(elapsed), true);
 		super.update(elapsed);
 	}
 	
@@ -192,23 +194,23 @@ class MusicBeatState extends FlxUIState
 	
 	public function stepHit():Void
 	{
-		if (curStep % 4 == 0) beatHit();
-		
-		scriptGroup.event('onStepHit', EventCache.get(IntEvent).recycle(curStep));
-		ModPlugin.instance.callOnPlugins('onStepHit');
+		var event = EventCache.get(IntEvent).recycle(curStep);
+		dispatchEvent('onStepHit', event, true);
+		ModPlugin.instance.event('onStepHit', event, true);
 	}
 	
 	public function beatHit():Void
 	{
-		scriptGroup.event('onBeatHit', EventCache.get(IntEvent).recycle(curBeat));
-		ModPlugin.instance.callOnPlugins('onBeatHit');
+		var event = EventCache.get(IntEvent).recycle(curBeat);
+		dispatchEvent('onBeatHit', event, true);
+		ModPlugin.instance.event('onBeatHit', event, true);
 	}
 	
 	public function sectionHit():Void
 	{
-		scriptGroup.event('onSectionHit', EventCache.get(IntEvent).recycle(curSection));
-		
-		ModPlugin.instance.callOnPlugins('onSectionHit');
+		var event = EventCache.get(IntEvent).recycle(curSection);
+		dispatchEvent('onSectionHit', event, true);
+		ModPlugin.instance.event('onSectionHit', event, true);
 	}
 	
 	function getBeatsOnSection():Float

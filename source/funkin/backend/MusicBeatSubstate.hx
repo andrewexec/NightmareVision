@@ -82,9 +82,13 @@ class MusicBeatSubstate extends FlxSubState
 		updateCurStep();
 		updateBeat();
 		
-		if (oldStep != curStep)
+		if (oldStep != curStep) // fix this later
 		{
-			if (curStep > 0) stepHit();
+			if (curStep > 0)
+			{
+				stepHit();
+				if (curStep % 4 == 0) beatHit();
+			}
 			
 			if (PlayState.SONG != null)
 			{
@@ -92,8 +96,7 @@ class MusicBeatSubstate extends FlxSubState
 				else rollbackSection();
 			}
 		}
-		
-		scriptGroup.call('onUpdate', [elapsed]);
+		scriptGroup.event('onUpdate', EventCache.get(UpdateEvent).recycle(elapsed), true);
 		
 		super.update(elapsed);
 	}
@@ -153,18 +156,17 @@ class MusicBeatSubstate extends FlxSubState
 	
 	public function stepHit():Void
 	{
-		if (curStep % 4 == 0) beatHit();
-		scriptGroup.call('onStepHit', [curStep]);
+		scriptGroup.event('onStepHit', EventCache.get(IntEvent).recycle(curStep), true);
 	}
 	
 	public function beatHit():Void
 	{
-		scriptGroup.call('onBeatHit', [curBeat]);
+		scriptGroup.event('onBeatHit', EventCache.get(IntEvent).recycle(curBeat), true);
 	}
 	
 	public function sectionHit()
 	{
-		scriptGroup.call('onSectionHit');
+		scriptGroup.event('onSectionHit', EventCache.get(IntEvent).recycle(curSection), true);
 	}
 	
 	override function destroy()
