@@ -1,4 +1,4 @@
-package funkin.scripting.events;
+package funkin.scripting.events.notes;
 
 import funkin.objects.note.Note;
 

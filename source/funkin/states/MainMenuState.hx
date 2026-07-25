@@ -147,7 +147,7 @@ class MainMenuState extends MusicBeatState
 			
 			if (controls.ACCEPT)
 			{
-				if (scriptGroup.event("onSelect", new BasicEvent()).cancelled)
+				if (dispatchEvent("onSelect", new BasicEvent()).cancelled)
 				{
 					super.update(elapsed);
 					
@@ -197,7 +197,10 @@ class MainMenuState extends MusicBeatState
 		final lastCurSel = curSelected;
 		curSelected = FlxMath.wrap(curSelected + diff, 0, menuItems.length - 1);
 		
-		if (scriptGroup.event("onChangeSelection", new BasicEvent()).cancelled) return;
+		if (dispatchEvent("onChangeSelection", new BasicEvent()).cancelled)
+		{
+			return;
+		}
 		
 		final prevObj = menuItems.members[lastCurSel];
 		prevObj.animation.play('idle');

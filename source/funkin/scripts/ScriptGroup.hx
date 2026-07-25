@@ -139,11 +139,12 @@ class ScriptGroup implements IFlxDestroyable
 				continue;
 			}
 			
-			var ret:Dynamic = script.call(func, args)?.returnValue;
 			if (!event.shouldPropogate)
 			{
 				break;
 			}
+			
+			var ret:Dynamic = script.call(func, args)?.returnValue;
 		}
 		return event;
 	}

@@ -56,7 +56,7 @@ class Init extends FlxState
 		
 		funkin.scripts.FunkinScript.init();
 		
-		funkin.scripting.EventDispatcher.init();
+		funkin.scripting.EventCache.init();
 		
 		// ready backends
 		funkin.backend.plugins.HotReloadPlugin.init();

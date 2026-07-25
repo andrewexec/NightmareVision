@@ -12,7 +12,7 @@ import funkin.scripting.ScriptConstants;
 import funkin.audio.FunkinSound;
 import funkin.backend.Logger;
 import funkin.utils.*;
-import funkin.scripting.EventDispatcher;
+import funkin.scripting.EventCache;
 import funkin.scripting.events.*;
 
 using haxe.io.Path;

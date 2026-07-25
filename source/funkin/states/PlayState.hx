@@ -1016,7 +1016,7 @@ class PlayState extends MusicBeatState
 		
 		final ret:Dynamic = scripts.call('onStartCountdown', []);
 		
-		if (scripts.event("onStartCountdown", new BasicEvent()).cancelled)
+		if (dispatchEvent("onStartCountdown", new BasicEvent()).cancelled)
 		{
 			return;
 		}
@@ -1684,14 +1684,14 @@ class PlayState extends MusicBeatState
 		
 		if (generatedMusic && !endingSong && !isCameraOnForcedPos) moveCameraSection();
 		
-		scripts.call('onUpdate', [elapsed]);
+		dispatchEvent('onUpdate', EventCache.get(UpdateEvent).recycle(elapsed));
 		
 		super.update(elapsed);
 		input.update();
 		
 		if (controls.PAUSE && startedCountdown && canPause)
 		{
-			if (scripts.call('onPause', []) != ScriptConstants.STOP_FUNC) openPauseMenu();
+			if (!dispatchEvent('onPause', new BasicEvent()).cancelled) openPauseMenu();
 		}
 		
 		if (canAccessEditors && !endingSong && !inCutscene)
@@ -1908,7 +1908,7 @@ class PlayState extends MusicBeatState
 			screenDim.screenCenter();
 		}
 		
-		scripts.call('onUpdatePost', [elapsed]);
+		dispatchEvent('onUpdatePost', EventCache.get(UpdateEvent).recycle(elapsed));
 	}
 	
 	public function recycleNote(queueNote:QueueNote, ?parent:Note, ?prevNote:Note):Note
@@ -2459,6 +2459,13 @@ class PlayState extends MusicBeatState
 		var isDad = !SONG.notes[curSection].mustHitSection;
 		moveCamera(isDad);
 		scripts.call('onMoveCamera', [isDad ? 'dad' : 'boyfriend']);
+	}
+	
+	override function dispatchEvent<T:BasicEvent>(func:String, event:T):T
+	{
+		scripts.event(func, event);
+		
+		return event;
 	}
 	
 	public function getCharacterCameraPos(char:Null<Character>):FlxPoint

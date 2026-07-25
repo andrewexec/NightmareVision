@@ -247,4 +247,16 @@ class MusicBeatState extends FlxUIState
 		scriptGroup.call('onCloseSubState', []);
 		super.closeSubState();
 	}
+	
+	/**
+	 * Dispatches a event onto all scriptGroups
+	 * 
+	 * Whatever groups this will be called onto changes per state implementation
+	 */
+	public function dispatchEvent<T:BasicEvent>(func:String, event:T):T
+	{
+		scriptGroup.event(func, event);
+		
+		return event;
+	}
 }

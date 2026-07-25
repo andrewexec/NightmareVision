@@ -4,7 +4,7 @@ import flixel.FlxState;
 
 import funkin.scripting.events.*;
 
-final class EventDispatcher
+final class EventCache
 {
 	public static function init()
 	{

@@ -8,17 +8,17 @@ class BasicEvent implements IFlxDestroyable
 	/**
 	 * if cancelled, the function the event was used in will be cancelled.
 	 */
-	@:ignore public var cancelled:Bool = false;
+	public var cancelled:Bool = false;
 	
 	/**
 	 * Whether the event should be called on the next script.
 	 */
-	@:ignore public var shouldPropogate:Bool = true;
+	public var shouldPropogate:Bool = true;
 	
 	/**
 	 * Additional data if used in scripts
 	 */
-	@:ignore public var data:Dynamic = {};
+	public var data:Dynamic = {};
 	
 	/**
 	 * Creates a new basic event.
