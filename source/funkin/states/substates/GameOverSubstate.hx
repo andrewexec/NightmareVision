@@ -74,8 +74,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		PlayState.instance?.scripts.set('inGameOver', true);
 		
 		Conductor.songPosition = 0;
-		
-		if (PlayState.instance?.scripts.call('onGameOverStart', []) != ScriptConstants.STOP_FUNC)
+		if (!PlayState.instance?.dispatchEvent('onGameOverStart', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
 			if (boyfriend == null)
 			{
@@ -134,12 +133,12 @@ class GameOverSubstate extends MusicBeatSubstate
 		
 		if (controls.ACCEPT)
 		{
-			if (PlayState.instance?.scripts.call('onGameOverConfirm', []) != ScriptConstants.STOP_FUNC) endBullshit();
+			if (!PlayState.instance?.dispatchEvent('onGameOverConfirm', EventCache.get(BasicEvent).basicRecycle()).cancelled) endBullshit();
 		}
 		
 		if (controls.BACK)
 		{
-			if (PlayState.instance?.scripts.call('onGameOverCancel', []) != ScriptConstants.STOP_FUNC)
+			if (!PlayState.instance?.dispatchEvent('onGameOverCancel', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 			{
 				FlxG.sound.music.stop();
 				PlayState.deathCounter = 0;

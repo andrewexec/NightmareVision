@@ -5,7 +5,7 @@ import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 @:autoBuild(funkin.backend.macro.EventMacro.build())
 class BasicEvent implements IFlxDestroyable
 {
-	public var isCancellable:Bool = false;
+	public var isCancellable:Bool = true;
 	
 	/**
 	 * if cancelled, the function the event was used in will be cancelled.
@@ -31,7 +31,7 @@ class BasicEvent implements IFlxDestroyable
 	/**
 	 * The basic event recycle method. Use this for `BasicEvent` but for any other use the `recycle` method.
 	 */
-	public function basicRecycle(?cancellable:Bool = false)
+	public function basicRecycle(?cancellable:Bool = true)
 	{
 		data = {};
 		cancelled = false;

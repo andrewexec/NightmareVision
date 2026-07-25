@@ -234,9 +234,6 @@ class FunkinScript extends IrisEx implements IFlxDestroyable
 		set('curBpm', Conductor.bpm);
 		set('crotchet', Conductor.crotchet);
 		set('stepCrotchet', Conductor.stepCrotchet);
-		set('Function_Halt', funkin.scripting.ScriptConstants.HALT_FUNC);
-		set('Function_Stop', funkin.scripting.ScriptConstants.STOP_FUNC);
-		set('Function_Continue', funkin.scripting.ScriptConstants.CONTINUE_FUNC);
 		set('curBeat', 0);
 		set('curStep', 0);
 		set('curSection', 0);

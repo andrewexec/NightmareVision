@@ -312,7 +312,7 @@ class PauseSubState extends MusicBeatSubstate
 	
 	public function returnToMain()
 	{
-		if (scriptGroup.call('onExit', []) != ScriptConstants.STOP_FUNC)
+		if (!scriptGroup.event('onExit', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
 			PlayState.deathCounter = 0;
 			PlayState.seenCutscene = false;
@@ -326,7 +326,7 @@ class PauseSubState extends MusicBeatSubstate
 	
 	public function toOptions()
 	{
-		if (scriptGroup.call('onOptions', []) != ScriptConstants.STOP_FUNC)
+		if (!scriptGroup.event('onOptions', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
 			PlayState.instance.paused = true;
 			PlayState.instance.audio.volume = 0;
@@ -346,7 +346,7 @@ class PauseSubState extends MusicBeatSubstate
 	
 	public function restartSong(noTrans:Bool = false)
 	{
-		if (scriptGroup.call('onRestart', []) != ScriptConstants.STOP_FUNC)
+		if (!scriptGroup.event('onRestart', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
 			PlayState.instance.paused = true;
 			FlxG.sound.music.volume = 0;
@@ -375,24 +375,30 @@ class PauseSubState extends MusicBeatSubstate
 		
 		var ret = scriptGroup.call('onChangeSelection', [curSelected]);
 		
-		if (ret != ScriptConstants.STOP_FUNC)
+		var ev = scriptGroup.event('onChangeSelection', EventCache.get(IntEvent).recycle(curSelected));
+		
+		if (ev.cancelled)
 		{
-			FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+			return;
+		}
+		
+		curSelected = ev.value;
+		
+		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		
+		for (k => item in grpMenuShit.members)
+		{
+			item.targetY = k - curSelected;
 			
-			for (k => item in grpMenuShit.members)
+			item.alpha = 0.6;
+			if (item.targetY == 0)
 			{
-				item.targetY = k - curSelected;
+				item.alpha = 1;
 				
-				item.alpha = 0.6;
-				if (item.targetY == 0)
+				if (item == skipTimeTracker)
 				{
-					item.alpha = 1;
-					
-					if (item == skipTimeTracker)
-					{
-						curTime = Math.max(0, Conductor.songPosition);
-						updateSkipTimeText();
-					}
+					curTime = Math.max(0, Conductor.songPosition);
+					updateSkipTimeText();
 				}
 			}
 		}

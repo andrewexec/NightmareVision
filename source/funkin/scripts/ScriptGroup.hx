@@ -129,7 +129,7 @@ class ScriptGroup implements IFlxDestroyable
 	 * @param func the method to call
 	 * @return The event.
 	 */
-	public function event<T:BasicEvent>(func:String, event:T):T
+	public function event<T:BasicEvent>(func:String, event:T, immutablePropogation:Bool = false):T
 	{
 		var args = [event];
 		for (script in members)
@@ -139,12 +139,12 @@ class ScriptGroup implements IFlxDestroyable
 				continue;
 			}
 			
-			if (!event.shouldPropogate)
+			if (!event.shouldPropogate && !immutablePropogation)
 			{
 				break;
 			}
 			
-			var ret:Dynamic = script.call(func, args)?.returnValue;
+			var ret:Dynamic = script.call(func, args);
 		}
 		return event;
 	}

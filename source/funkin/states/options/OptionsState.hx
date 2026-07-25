@@ -135,7 +135,13 @@ class OptionsState extends MusicBeatState
 	{
 		curSelected = FlxMath.wrap(curSelected + diff, 0, options.length - 1);
 		
-		if (scriptGroup.call('onChangeSelection', [curSelected]) == ScriptConstants.STOP_FUNC) return;
+		var event = dispatchEvent('onChangeSelection', EventCache.get(BasicEvent).basicRecycle());
+		if (event.cancelled)
+		{
+			return;
+		}
+		
+		curSelected = event.value;
 		
 		for (idx => item in grpOptions.members)
 		{

@@ -255,9 +255,9 @@ class MusicBeatState extends FlxUIState
 	 * 
 	 * Whatever groups this will be called onto changes per state implementation
 	 */
-	public function dispatchEvent<T:BasicEvent>(func:String, event:T):T
+	public function dispatchEvent<T:BasicEvent>(func:String, event:T, immutablePropogation:Bool = false):T
 	{
-		scriptGroup.event(func, event);
+		scriptGroup.event(func, event, immutablePropogation);
 		
 		return event;
 	}

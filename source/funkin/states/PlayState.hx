@@ -828,7 +828,7 @@ class PlayState extends MusicBeatState
 		
 		Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000;
 		
-		scripts.call('onCreatePost', []);
+		scripts.call('onCreatePost');
 		
 		callHUDFunc(hud -> hud.cachePopUpScore());
 		
@@ -1008,13 +1008,11 @@ class PlayState extends MusicBeatState
 	{
 		if (startedCountdown)
 		{
-			scripts.call('onStartCountdown', []);
+			scripts.call('onStartCountdown');
 			return;
 		}
 		
 		inCutscene = false;
-		
-		final ret:Dynamic = scripts.call('onStartCountdown', []);
 		
 		if (dispatchEvent("onStartCountdown", EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
@@ -1028,7 +1026,7 @@ class PlayState extends MusicBeatState
 			startedCountdown = true;
 			Conductor.songPosition = 0;
 			Conductor.songPosition -= Conductor.crotchet * 5;
-			scripts.call('onCountdownStarted', []);
+			scripts.call('onCountdownStarted');
 			
 			var swagCounter:Int = 0;
 			
@@ -1076,7 +1074,9 @@ class PlayState extends MusicBeatState
 					case 4:
 				}
 				
-				scripts.call('onCountdownTick', [swagCounter]);
+				var ev = dispatchEvent('onCountdownTick', EventCache.get(IntEvent).recycle(swagCounter));
+				
+				swagCounter = ev.value;
 				
 				swagCounter += 1;
 			}, 5);
@@ -1174,7 +1174,7 @@ class PlayState extends MusicBeatState
 		if (automatedDiscord) DiscordClient.changePresence(rpcDescription, rpcSongName + ' ' + rpcDifficulty, null, true, songLength);
 		
 		scripts.set('songLength', songLength);
-		scripts.call('onSongStart', []);
+		scripts.call('onSongStart');
 		callHUDFunc(hud -> hud.onSongStart());
 	}
 	
@@ -1691,7 +1691,7 @@ class PlayState extends MusicBeatState
 		
 		if (generatedMusic && !endingSong && !isCameraOnForcedPos) moveCameraSection();
 		
-		dispatchEvent('onUpdate', EventCache.get(UpdateEvent).recycle(elapsed));
+		dispatchEvent('onUpdate', EventCache.get(UpdateEvent).recycle(elapsed), true);
 		
 		super.update(elapsed);
 		input.update();
@@ -1915,7 +1915,7 @@ class PlayState extends MusicBeatState
 			screenDim.screenCenter();
 		}
 		
-		dispatchEvent('onUpdatePost', EventCache.get(UpdateEvent).recycle(elapsed));
+		dispatchEvent('onUpdatePost', EventCache.get(UpdateEvent).recycle(elapsed), true);
 	}
 	
 	public function recycleNote(queueNote:QueueNote, ?parent:Note, ?prevNote:Note):Note
@@ -1995,8 +1995,10 @@ class PlayState extends MusicBeatState
 			notes.insert(0, note);
 			note.spawned = true;
 			
-			var ret:Dynamic = callNoteTypeScript(note.noteType, 'postSpawnNote', [note]);
-			if (ret != ScriptConstants.STOP_FUNC) scripts.call('onSpawnNotePost', [note], false, [note.noteType]);
+			dispatchEvent('onSpawnNotePost', EventCache.get(NoteEvent).recycle(note));
+			
+			// var ret:Dynamic = callNoteTypeScript(note.noteType, 'postSpawnNote', [note]);
+			// if (ret != ScriptConstants.STOP_FUNC) scripts.call('onSpawnNotePost', [note], false, [note.noteType]);
 			
 			return note;
 		}
@@ -2045,8 +2047,10 @@ class PlayState extends MusicBeatState
 	
 	public function updateScoreBar(miss:Bool = false):Void
 	{
-		if (scripts.call('onUpdateScore',
-			[miss]) != ScriptConstants.STOP_FUNC) callHUDFunc(hud -> hud.onUpdateScore(songScore, funkin.utils.MathUtil.floorDecimal(ratingPercent * 100, 2), songMisses, miss));
+		if (!dispatchEvent('onUpdateScore', EventCache.get(BasicEvent).basicRecycle()).cancelled)
+		{
+			callHUDFunc(hud -> hud.onUpdateScore(songScore, funkin.utils.MathUtil.floorDecimal(ratingPercent * 100, 2), songMisses, miss));
+		}
 	}
 	
 	public var isDead:Bool = false;
@@ -2089,14 +2093,9 @@ class PlayState extends MusicBeatState
 	{
 		while (eventNotes.length > 0)
 		{
-			final leStrumTime:Float = eventNotes[0].strumTime;
+			if (Conductor.songPosition < eventNotes[0].strumTime) break;
 			
-			if (Conductor.songPosition < leStrumTime) break;
-			
-			final value1:String = eventNotes[0].value1 ?? '';
-			final value2:String = eventNotes[0].value2 ?? '';
-			
-			triggerEventNote(eventNotes[0].event, value1, value2);
+			triggerEventNote(eventNotes[0]);
 			eventNotes.shift();
 		}
 	}
@@ -2126,9 +2125,12 @@ class PlayState extends MusicBeatState
 		callHUDFunc(hud -> hud.onCharacterChange());
 	}
 	
-	public function triggerEventNote(eventName:String, value1:String, value2:String):Void
+	public function triggerEventNote(event:EventNote):Void
 	{
-		switch (eventName)
+		final value1 = event.value1 ?? '';
+		final value2 = event.value2 ?? '';
+		
+		switch (event.event)
 		{
 			case 'Hey!':
 				var value:Int = 2;
@@ -2431,9 +2433,9 @@ class PlayState extends MusicBeatState
 				}
 		}
 		
-		scripts.call('onEvent', [eventName, value1, value2]);
+		dispatchEvent('onEvent', EventCache.get(EvNoteEvent).recycle(event));
 		
-		callEventScript(eventName, 'onTrigger', [value1, value2]);
+		callEventScript(event.event, 'onTrigger', [value1, value2]);
 	}
 	
 	function moveCameraSection():Void
@@ -2442,6 +2444,13 @@ class PlayState extends MusicBeatState
 		
 		if (gf != null && SONG.notes[curSection].gfSection)
 		{
+			var event = dispatchEvent('onMoveCamera', EventCache.get(MoveCameraEvent).recycle(gf, 'gf'));
+			
+			if (event.cancelled)
+			{
+				return;
+			}
+			
 			camFollow.setPosition(gf.getMidpoint().x, gf.getMidpoint().y);
 			camFollow.x += gf.cameraPosition[0] + girlfriendCameraOffset[0];
 			camFollow.y += gf.cameraPosition[1] + girlfriendCameraOffset[1];
@@ -2455,23 +2464,15 @@ class PlayState extends MusicBeatState
 				
 				displacement.putWeak();
 			}
-			
-			// dispatche
-			
-			scripts.call('onMoveCamera', ['gf']);
-			scripts.set('whosTurn', 'gf');
 			return;
 		}
 		
-		var isDad = !SONG.notes[curSection].mustHitSection;
-		moveCamera(isDad);
-		scripts.call('onMoveCamera', [isDad ? 'dad' : 'boyfriend']);
+		moveCamera(!SONG.notes[curSection].mustHitSection);
 	}
 	
-	override function dispatchEvent<T:BasicEvent>(func:String, event:T):T
+	override function dispatchEvent<T:BasicEvent>(func:String, event:T, immutablePropogation:Bool = false):T
 	{
-		scripts.event(func, event);
-		
+		scripts.event(func, event, immutablePropogation);
 		return event;
 	}
 	
@@ -2509,6 +2510,13 @@ class PlayState extends MusicBeatState
 		
 		if (camCurTarget != null) curCharacter = camCurTarget;
 		
+		var event = dispatchEvent('onMoveCamera', EventCache.get(MoveCameraEvent).recycle(curCharacter, isDad ? 'dad' : 'boyfriend'));
+		
+		if (event.cancelled)
+		{
+			return;
+		}
+		
 		desiredPos = getCharacterCameraPos(curCharacter);
 		
 		camFollow.x = desiredPos.x;
@@ -2525,8 +2533,6 @@ class PlayState extends MusicBeatState
 		}
 		
 		desiredPos.put();
-		
-		scripts.set('whosTurn', isDad ? 'dad' : 'boyfriend');
 	}
 	
 	/**
@@ -2592,9 +2598,7 @@ class PlayState extends MusicBeatState
 		deathCounter = 0;
 		seenCutscene = false;
 		
-		final ret:Dynamic = scripts.call('onEndSong', []);
-		
-		if (ret != ScriptConstants.STOP_FUNC && !transitioning)
+		if (!dispatchEvent('onEndSong', EventCache.get(BasicEvent).basicRecycle()).cancelled && !transitioning)
 		{
 			playbackRate = 1;
 			var percent:Float = ratingPercent;
