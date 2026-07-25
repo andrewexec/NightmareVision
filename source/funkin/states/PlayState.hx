@@ -1016,7 +1016,7 @@ class PlayState extends MusicBeatState
 		
 		final ret:Dynamic = scripts.call('onStartCountdown', []);
 		
-		if (dispatchEvent("onStartCountdown", new BasicEvent()).cancelled)
+		if (dispatchEvent("onStartCountdown", EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
 			return;
 		}
@@ -1561,7 +1561,8 @@ class PlayState extends MusicBeatState
 			default:
 				callEventScript(event.event, 'onPush', [event]);
 		}
-		scripts.call('onEventPush', [event]);
+		
+		dispatchEvent('onEventPush', EventCache.get(EvNoteEvent).recycle(event));
 	}
 	
 	function firstEventPush(event:EventNote):Void
@@ -1575,6 +1576,13 @@ class PlayState extends MusicBeatState
 	
 	override function openSubState(SubState:FlxSubState):Void
 	{
+		var event = dispatchEvent('onSubstateOpen', EventCache.get(StateEvent).recycle(SubState));
+		
+		if (event.cancelled)
+		{
+			return;
+		}
+		
 		if (paused)
 		{
 			if (audio != null) audio.pause();
@@ -1601,8 +1609,7 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
-		scripts.call('onSubstateOpen', []);
-		super.openSubState(SubState);
+		super.openSubState(cast event.state);
 	}
 	
 	override function closeSubState():Void
@@ -1619,11 +1626,11 @@ class PlayState extends MusicBeatState
 			#end
 			
 			paused = false;
-			scripts.call('onResume', []);
+			scripts.call('onResume');
 			
 			resetDiscordRPC(startTimer != null && startTimer.finished);
 		}
-		scripts.call('onSubstateClose', []);
+		scripts.call('onSubstateClose');
 		super.closeSubState();
 	}
 	
@@ -1691,7 +1698,7 @@ class PlayState extends MusicBeatState
 		
 		if (controls.PAUSE && startedCountdown && canPause)
 		{
-			if (!dispatchEvent('onPause', new BasicEvent()).cancelled) openPauseMenu();
+			if (!dispatchEvent('onPause', EventCache.get(BasicEvent).basicRecycle()).cancelled) openPauseMenu();
 		}
 		
 		if (canAccessEditors && !endingSong && !inCutscene)
@@ -1952,8 +1959,7 @@ class PlayState extends MusicBeatState
 	{
 		note.postRecycle();
 		
-		if (callNoteTypeScript(note.noteType, 'spawnNote', [note]) == ScriptConstants.STOP_FUNC
-			|| scripts.call('onSpawnNote', [note], false, [note.noteType]) == ScriptConstants.STOP_FUNC)
+		if (dispatchEvent('onSpawnNote', EventCache.get(NoteEvent).recycle(note)).cancelled)
 		{
 			note.kill();
 			
@@ -2049,8 +2055,7 @@ class PlayState extends MusicBeatState
 	{
 		if ((skipHealthCheck && instakillOnMiss) || ((healthBounds.max > healthBounds.min && health <= healthBounds.min) || (healthBounds.min > healthBounds.max && health >= healthBounds.min)) && !practiceMode && !isDead)
 		{
-			final ret:Dynamic = scripts.call('onGameOver', []);
-			if (ret != ScriptConstants.STOP_FUNC)
+			if (!dispatchEvent('onGameOver', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 			{
 				final char = playerStrums.owner;
 				
@@ -2450,6 +2455,8 @@ class PlayState extends MusicBeatState
 				
 				displacement.putWeak();
 			}
+			
+			// dispatche
 			
 			scripts.call('onMoveCamera', ['gf']);
 			scripts.set('whosTurn', 'gf');
@@ -3036,8 +3043,7 @@ class PlayState extends MusicBeatState
 	
 	public function RecalculateRating(badHit:Bool = false)
 	{
-		final ret:Dynamic = scripts.call('onRecalculateRating', []);
-		if (ret != ScriptConstants.STOP_FUNC)
+		if (!dispatchEvent('onRecalculateRating', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
 			if (totalPlayed < 1) // Prevent divide by 0
 				ratingName = '?';

@@ -26,6 +26,7 @@ class EventMacro
 		// gets all fields
 		var values:Array<EventVar> = [];
 		var hiddenValues:Array<EventVar> = [];
+		
 		for (field in fields)
 		{
 			if (field.access.contains(AStatic)) continue;
@@ -100,7 +101,7 @@ class EventMacro
 				}
 				
 				exprs.push(macro return this);
-				exprs.insert(0, macro _recycle());
+				exprs.insert(0, macro basicRecycle());
 			default:
 				// nothing
 		}

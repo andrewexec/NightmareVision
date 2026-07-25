@@ -169,7 +169,7 @@ class MusicBeatSubstate extends FlxSubState
 	
 	override function destroy()
 	{
-		scriptGroup.call('onDestroy', []);
+		scriptGroup.call('onDestroy');
 		
 		scriptGroup = FlxDestroyUtil.destroy(scriptGroup);
 		

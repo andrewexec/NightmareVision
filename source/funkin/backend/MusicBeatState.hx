@@ -80,7 +80,7 @@ class MusicBeatState extends FlxUIState
 			scripted = true;
 		}
 		
-		if (callOnLoad) scriptGroup.call('onLoad', []);
+		if (callOnLoad) scriptGroup.call('onLoad');
 		
 		return scripted;
 	}
@@ -193,19 +193,21 @@ class MusicBeatState extends FlxUIState
 	public function stepHit():Void
 	{
 		if (curStep % 4 == 0) beatHit();
-		scriptGroup.call('onStepHit', []);
+		
+		scriptGroup.event('onStepHit', EventCache.get(IntEvent).recycle(curStep));
 		ModPlugin.instance.callOnPlugins('onStepHit');
 	}
 	
 	public function beatHit():Void
 	{
-		scriptGroup.call('onBeatHit', []);
+		scriptGroup.event('onBeatHit', EventCache.get(IntEvent).recycle(curBeat));
 		ModPlugin.instance.callOnPlugins('onBeatHit');
 	}
 	
 	public function sectionHit():Void
 	{
-		scriptGroup.call('onSectionHit', []);
+		scriptGroup.event('onSectionHit', EventCache.get(IntEvent).recycle(curSection));
+		
 		ModPlugin.instance.callOnPlugins('onSectionHit');
 	}
 	
@@ -244,7 +246,7 @@ class MusicBeatState extends FlxUIState
 	
 	override function closeSubState()
 	{
-		scriptGroup.call('onCloseSubState', []);
+		scriptGroup.call('onCloseSubState');
 		super.closeSubState();
 	}
 	
