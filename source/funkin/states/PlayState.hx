@@ -486,13 +486,6 @@ class PlayState extends MusicBeatState
 	var debugKeysChart:Array<FlxKey>;
 	var debugKeysCharacter:Array<FlxKey>;
 	
-	// public var controlHoldArray:Array<Dynamic>;
-	
-	/**
-	 * once set to a target, the camera will only follow them.
-	 */
-	public var camCurTarget:Null<Character> = null;
-	
 	public var playHUD:Null<BaseHUD> = null;
 	
 	public var countdownPrefix:String = Paths.COUNTDOWN_PREFIX;
@@ -1739,10 +1732,9 @@ class PlayState extends MusicBeatState
 		
 		if (camZooming)
 		{
-			@:privateAccess if (!FlxTween.globalManager.containsTweensOf(FlxG.camera, ['zoom']))
-				FlxG.camera.zoom = MathUtil.decayLerp(FlxG.camera.zoom, defaultCamZoom + defaultCamZoomAdd, 6.25 * camZoomingDecay, elapsed);
-			@:privateAccess if (!FlxTween.globalManager.containsTweensOf(camHUD, ['zoom']))
-				camHUD.zoom = MathUtil.decayLerp(camHUD.zoom, defaultHudZoom, 6.25 * camZoomingDecay, elapsed);
+			@:privateAccess if (!FlxTween.globalManager.containsTweensOf(FlxG.camera,
+				['zoom'])) FlxG.camera.zoom = MathUtil.decayLerp(FlxG.camera.zoom, defaultCamZoom + defaultCamZoomAdd, 6.25 * camZoomingDecay, elapsed);
+			@:privateAccess if (!FlxTween.globalManager.containsTweensOf(camHUD, ['zoom'])) camHUD.zoom = MathUtil.decayLerp(camHUD.zoom, defaultHudZoom, 6.25 * camZoomingDecay, elapsed);
 		}
 		
 		if (!ClientPrefs.noReset && controls.RESET && canReset && !inCutscene && startedCountdown && !endingSong) health = 0;
@@ -2510,8 +2502,6 @@ class PlayState extends MusicBeatState
 		if (opponentStrums != null && playerStrums != null) curCharacter = isDad ? opponentStrums.owner : playerStrums.owner;
 		else curCharacter = isDad ? dad : boyfriend;
 		
-		if (camCurTarget != null) curCharacter = camCurTarget;
-		
 		var event = dispatchEvent('onMoveCamera', EventCache.get(MoveCameraEvent).recycle(curCharacter, isDad ? 'dad' : 'boyfriend'));
 		
 		if (event.cancelled)
@@ -2965,7 +2955,7 @@ class PlayState extends MusicBeatState
 		
 		if (camZooming && ClientPrefs.camZooms && curBeat % beatsPerZoom == 0)
 		{
-			@:privateAccess if (!FlxTween.globalManager.containsTweensOf(FlxG.camera, ['zoom'])) //makes it so tweening the camera zoom won't glitch out when it bops every section
+			@:privateAccess if (!FlxTween.globalManager.containsTweensOf(FlxG.camera, ['zoom'])) // makes it so tweening the camera zoom won't glitch out when it bops every section
 				FlxG.camera.zoom += 0.015 * camZoomingMult;
 			@:privateAccess if (!FlxTween.globalManager.containsTweensOf(camHUD, ['zoom'])) // just in case
 				camHUD.zoom += 0.03 * camZoomingMult;
