@@ -135,7 +135,7 @@ class OptionsState extends MusicBeatState
 	{
 		curSelected = FlxMath.wrap(curSelected + diff, 0, options.length - 1);
 		
-		var event = dispatchEvent('onChangeSelection', EventCache.get(BasicEvent).basicRecycle());
+		var event = dispatchEvent('onChangeSelection', EventCache.get(IntEvent).recycle(curSelected));
 		if (event.cancelled)
 		{
 			return;
