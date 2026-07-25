@@ -31,12 +31,12 @@ class BasicEvent implements IFlxDestroyable
 	/**
 	 * The basic event recycle method. Use this for `BasicEvent` but for any other use the `recycle` method.
 	 */
-	public function basicRecycle()
+	public function basicRecycle(?cancellable:Bool = false)
 	{
 		data = {};
 		cancelled = false;
 		shouldPropogate = true;
-		isCancellable = false;
+		isCancellable = cancellable;
 		
 		return this;
 	}

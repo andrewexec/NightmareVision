@@ -56,55 +56,52 @@ class EventMacro
 			}
 		}
 		
-		// add recycle option
+		// add recycle Function
+		var funcBlock:Array<Expr> = [macro basicRecycle(isCancellable)];
+		
+		// add a "set this" expr for each variable
+		for (v in values)
+		{
+			var name = v.name;
+			funcBlock.push(macro this.$name = $i{name});
+		}
+		
+		// add a "set this" expr to reset each private/hidden variables
+		for (v in hiddenValues)
+		{
+			var name = v.name;
+			funcBlock.push(macro this.$name = ${v.expr});
+		}
+		
+		funcBlock.push(macro return this);
+		
 		var func:Function =
 			{
 				args: [for (a in values)
 					{
-						value: a.expr,
+						name: a.name,
 						type: a.type,
-						opt: false,
-						name: a.name
-					}],
+						opt: false
+					}].concat([ // im gay
+					{
+						name: 'isCancellable',
+						type: macro:Null<Bool>,
+						opt: true
+					}]),
 				expr:
 					{
 						pos: Context.currentPos(),
-						expr: EBlock([])
+						expr: EBlock(funcBlock)
 					}
 			};
-			
-		var funcField:Field =
-			{
-				pos: Context.currentPos(),
-				name: "recycle",
-				kind: FFun(func),
-				access: [APublic]
-			};
-			
-		fields.push(funcField);
 		
-		switch (func.expr.expr)
+		fields.push(
 		{
-			case EBlock(exprs):
-				// add a "set this" expr for each variable
-				for (v in values)
-				{
-					var name = v.name;
-					exprs.push(macro this.$name = $i{name});
-				}
-				
-				// add a "set this" expr to reset each private/hidden variables
-				for (v in hiddenValues)
-				{
-					var name = v.name;
-					exprs.push(macro this.$name = ${v.expr});
-				}
-				
-				exprs.push(macro return this);
-				exprs.insert(0, macro basicRecycle());
-			default:
-				// nothing
-		}
+			pos: Context.currentPos(),
+			name: "recycle",
+			kind: FFun(func),
+			access: [APublic]
+		});
 		
 		return fields;
 	}
