@@ -60,6 +60,7 @@ class CharacterParser
 		data.healthicon ??= baseInfo.healthicon;
 		data.healthbar_colour ??= baseInfo.healthbar_colour;
 		data.vslice_sustains ??= baseInfo.vslice_sustains;
+		data.ghosts_enabled ??= baseInfo.ghosts_enabled;
 		data.image ??= baseInfo.image;
 		data.dance_every ??= baseInfo.dance_every;
 		data.position ??= baseInfo.position;
@@ -335,6 +336,7 @@ class CharacterParser
 			healthicon: 'face',
 			healthbar_colour: FlxColor.GRAY,
 			vslice_sustains: false,
+			ghosts_enabled: false,
 			image: 'characters/BOYFRIEND',
 			dance_every: 2,
 			position: [0, 0],
@@ -471,6 +473,11 @@ typedef CharacterInfo =
 	 * If the character should hold the last frame during a sing pose
 	 */
 	var ?vslice_sustains:Bool;
+
+	/**
+	 * If the character should show a ghost on double notes
+	 */
+	var ?ghosts_enabled:Bool;
 	
 	/**
 	 * How many beats between the characters `dance`

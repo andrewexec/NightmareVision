@@ -93,6 +93,8 @@ class SustainSplash extends FunkinSprite implements funkin.game.modchart.IModNot
 		if (skin?.susSplashScale != null) scale.set(skin.susSplashScale, skin.susSplashScale);
 		
 		baseScale.copyFrom(scale);
+
+		addAnims(skin);
 		
 		updateHitbox();
 		
@@ -131,7 +133,7 @@ class SustainSplash extends FunkinSprite implements funkin.game.modchart.IModNot
 		{
 			completed = true;
 			
-			if (__isPlayer) playAnim('end$data', true);
+			if (__isPlayer && (ClientPrefs.noteSplashType == "Both" || ClientPrefs.noteSplashType == "Hold Covers")) playAnim('end$data', true);
 			else kill();
 		}
 	}

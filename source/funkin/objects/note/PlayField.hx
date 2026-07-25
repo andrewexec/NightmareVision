@@ -356,7 +356,7 @@ class PlayField extends FlxTypedContainer<StrumNote>
 		if (strum != null)
 		{
 			strum.lastNote = note;
-			strum.playAnim('confirm', true);
+			if (field.playAnims) strum.playAnim('confirm', true);
 			
 			if (field.autoPlayed)
 			{
@@ -539,8 +539,8 @@ class PlayField extends FlxTypedContainer<StrumNote>
 				final ghostAnim:String = char.getAnimName();
 				
 				if (!note.isSustainNote && Math.abs(char.lastHitTime - note.strumTime) < 3
-					&& PlayState.instance?.scripts.event('onGhostAnim', EventCache.get(NoteEvent).recycle(note))
-						.cancelled) // && PlayState.instance?.scripts.call('onGhostAnim', [ghostAnim, note]) != ScriptConstants.STOP_FUNC)
+					&& char.ghostsEnabled && PlayState.instance?.scripts.event('onGhostAnim', EventCache.get(NoteEvent).recycle(note))
+					.cancelled) // && PlayState.instance?.scripts.call('onGhostAnim', [ghostAnim, note]) != ScriptConstants.STOP_FUNC)
 				{
 					char.playGhostAnim(note.noteData, ghostAnim, true);
 				}
@@ -555,7 +555,7 @@ class PlayField extends FlxTypedContainer<StrumNote>
 	
 	public function spawnSplash(note:Note):NoteSplash
 	{
-		if (ClientPrefs.noteSplashes
+		if ((ClientPrefs.noteSplashType == "Both" || ClientPrefs.noteSplashType == "Note Splashes")
 			&& note != null
 			&& !note.hitCausesMiss
 			&& !note.isSustainNote
@@ -585,7 +585,9 @@ class PlayField extends FlxTypedContainer<StrumNote>
 	
 	public function spawnSusSplash(note:Note, isPlayer:Bool = false):SustainSplash
 	{
-		if (_skin?.sustainSplashes && note.tail.length > 0)
+		if ((ClientPrefs.noteSplashType == "Both" || ClientPrefs.noteSplashType == "Hold Covers")
+			&& _skin?.sustainSplashes
+			&& note.tail.length > 0)
 		{
 			final strum:Null<StrumNote> = note.playField.members[note.noteData];
 			if (strum != null)

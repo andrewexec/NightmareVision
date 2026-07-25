@@ -60,7 +60,7 @@ class ClientPrefs
 	@saveVar public static var vsyncMode:VsyncMode = OFF;
 	
 	// visuals ------------------------------------------------------------------------//
-	@saveVar public static var noteSplashes:Bool = true;
+	@saveVar public static var noteSplashType:String = 'Both';
 	
 	@saveVar public static var hideHud:Bool = false;
 	
@@ -209,11 +209,15 @@ class ClientPrefs
 		'back' => [BACKSPACE, ESCAPE],
 		'pause' => [ENTER, ESCAPE],
 		'reset' => [R, NONE],
+		'fullscreen' => [F11, NONE],
 		'volume_mute' => [ZERO, NONE],
 		'volume_up' => [NUMPADPLUS, PLUS],
 		'volume_down' => [NUMPADMINUS, MINUS],
 		'debug_1' => [SEVEN, NONE],
-		'debug_2' => [EIGHT, NONE]
+		'debug_2' => [EIGHT, NONE],
+		'soft_reload' => [F5, NONE],
+		'hard_reload' => [F6, NONE],
+		'switch_debug_display' => [F3, NONE]
 	];
 	
 	public static var defaultKeys:Map<Action, Array<FlxKey>> = null;

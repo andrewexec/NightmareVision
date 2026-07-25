@@ -184,6 +184,7 @@ class Character extends Bopper
 		
 		this.healthIcon = json.healthicon;
 		this.vSliceSustains = json.vslice_sustains;
+		this.ghostsEnabled = json.ghosts_enabled;
 		this.singDuration = json.sing_duration;
 		this.noAntialiasing = json.no_antialiasing;
 		

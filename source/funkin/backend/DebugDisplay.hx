@@ -7,6 +7,8 @@ import openfl.text.TextFormat;
 import openfl.Assets;
 import openfl.display.Sprite;
 
+import funkin.input.Controls;
+
 import flixel.util.FlxStringUtil;
 import flixel.FlxG;
 
@@ -161,7 +163,7 @@ class DebugDisplay extends Sprite
 		while (times[0] < now - 1000)
 			times.shift();
 			
-		if (FlxG.keys.justPressed.F3)
+		if (Controls.instance.SWITCH_DEBUG_DISPLAY)
 		{
 			final fpsTypeArray:Array<String> = ['Simple', 'Advanced', 'Disabled'];
 			ClientPrefs.fpsDisplayType = fpsTypeArray[FlxMath.wrap(fpsTypeArray.indexOf(ClientPrefs.fpsDisplayType) + 1, 0, fpsTypeArray.length - 1)];
