@@ -68,9 +68,6 @@ class InputSystem extends EventDispatcher implements flixel.util.IFlxDestroyable
 	var justPressedGamepadInputs:Array<Array<FlxActionInput>> = [];
 	var justReleasedGamepadInputs:Array<Array<FlxActionInput>> = [];
 	
-	// cleared out every frame
-	var awaitingEvents:Array<InputEvent> = [];
-	
 	#if FLX_GAMEINPUT_API
 	var awaitingAxisEvents:Array<{id:FlxGamepadInputID, gamepad:FlxGamepad, timer:Float}> = [];
 	
@@ -177,8 +174,6 @@ class InputSystem extends EventDispatcher implements flixel.util.IFlxDestroyable
 			if (info.gamepad.checkStatus(info.id, JUST_PRESSED)) onInputEvent(InputEvent.INPUT_PRESSED, Gamepad(info.gamepad.id), info.id, info.timer);
 			else if (info.gamepad.checkStatus(info.id, JUST_RELEASED)) onInputEvent(InputEvent.INPUT_RELEASED, Gamepad(info.gamepad.id), info.id, info.timer);
 		}
-		while (awaitingEvents.length > 0)
-			dispatchEvent(awaitingEvents.shift());
 	}
 	
 	public function destroy():Void
@@ -290,7 +285,7 @@ class InputSystem extends EventDispatcher implements flixel.util.IFlxDestroyable
 			@:nullSafety(Off)
 			if (inputs[inputID] != null)
 			{
-				awaitingEvents.push(new InputEvent(event, false, true, noteData, device, inputID, timer));
+				dispatchEvent(new InputEvent(event, false, true, noteData, device, inputID, timer));
 				// if we don't break here, then people would be able to bind multiple controls to the same key
 				// i don't know if we would want that and it's kinda cheaty so i'll just break
 				break;

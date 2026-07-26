@@ -335,7 +335,7 @@ class PlayState extends MusicBeatState
 	@:noCompletion function set_health(value:Float):Float
 	{
 		health = value;
-		callHUDFunc(hud -> hud.onHealthChange(value));
+		playHUD?.onHealthChange(value);
 		return value;
 	}
 	
@@ -547,9 +547,6 @@ class PlayState extends MusicBeatState
 		dadGroup.zIndex = file.dadZIndex ?? 0;
 		gfGroup.zIndex = file.gfZIndex ?? 0;
 	}
-	
-	// null checking
-	inline function callHUDFunc(hud:BaseHUD->Void):Void if (playHUD != null) hud(playHUD);
 	
 	var input:InputSystem;
 	
@@ -820,7 +817,7 @@ class PlayState extends MusicBeatState
 		
 		scripts.call('onCreatePost');
 		
-		callHUDFunc(hud -> hud.cachePopUpScore());
+		playHUD?.cachePopUpScore();
 		
 		super.create();
 		
@@ -1159,7 +1156,8 @@ class PlayState extends MusicBeatState
 		
 		scripts.set('songLength', songLength);
 		scripts.call('onSongStart');
-		callHUDFunc(hud -> hud.onSongStart());
+		
+		playHUD?.onSongStart();
 	}
 	
 	var noteTypeMap:Map<String, Bool> = new Map<String, Bool>();
@@ -1486,8 +1484,6 @@ class PlayState extends MusicBeatState
 				}
 				
 				addCharacterToList(event.value2, charType);
-			default:
-				callEventScript(event.event, 'onPush', [event]);
 		}
 		
 		dispatchEvent('onEventPush', EventCache.get(EvNoteEvent).recycle(event));
@@ -1495,11 +1491,7 @@ class PlayState extends MusicBeatState
 	
 	function firstEventPush(event:EventNote):Void
 	{
-		switch (event.event)
-		{
-			default:
-				callEventScript(event.event, 'onFirstPush', [event]);
-		}
+		dispatchEvent('onEventFirstPush', EventCache.get(EvNoteEvent).recycle(event));
 	}
 	
 	override function openSubState(SubState:FlxSubState):Void
@@ -1923,9 +1915,6 @@ class PlayState extends MusicBeatState
 			
 			dispatchEvent('onSpawnNotePost', EventCache.get(NoteEvent).recycle(note));
 			
-			// var ret:Dynamic = callNoteTypeScript(note.noteType, 'postSpawnNote', [note]);
-			// if (ret != ScriptConstants.STOP_FUNC) scripts.call('onSpawnNotePost', [note], false, [note.noteType]);
-			
 			return note;
 		}
 	}
@@ -1975,7 +1964,7 @@ class PlayState extends MusicBeatState
 	{
 		if (!dispatchEvent('onUpdateScore', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
-			callHUDFunc(hud -> hud.onUpdateScore(songScore, funkin.utils.MathUtil.floorDecimal(ratingPercent * 100, 2), songMisses, miss));
+			playHUD?.onUpdateScore(songScore, funkin.utils.MathUtil.floorDecimal(ratingPercent * 100, 2), songMisses, miss);
 		}
 	}
 	
@@ -2048,7 +2037,7 @@ class PlayState extends MusicBeatState
 		scripts.set('gf', gf);
 		scripts.set('gfGroup', gfGroup);
 		
-		callHUDFunc(hud -> hud.onCharacterChange());
+		playHUD?.onCharacterChange();
 	}
 	
 	public function triggerEventNote(event:EventNote):Void
@@ -2360,8 +2349,6 @@ class PlayState extends MusicBeatState
 		}
 		
 		dispatchEvent('onEvent', EventCache.get(EvNoteEvent).recycle(event));
-		
-		callEventScript(event.event, 'onTrigger', [value1, value2]);
 	}
 	
 	function moveCameraSection():Void
@@ -2658,7 +2645,8 @@ class PlayState extends MusicBeatState
 				RecalculateRating(false);
 			}
 		}
-		callHUDFunc(hud -> hud.popUpScore(daRating, combo, note)); // only pushing the image bc is anyone ever gonna need anything else???
+		
+		playHUD?.popUpScore(daRating, combo, note);
 	}
 	
 	function onInputPress(event:InputEvent):Void
@@ -2880,7 +2868,7 @@ class PlayState extends MusicBeatState
 		
 		lastStepHit = curStep;
 		
-		callHUDFunc(hud -> hud.stepHit());
+		playHUD?.stepHit();
 	}
 	
 	var lastStepHit:Int = -1;
@@ -2907,7 +2895,7 @@ class PlayState extends MusicBeatState
 		
 		lastBeatHit = curBeat;
 		
-		callHUDFunc(hud -> hud.beatHit());
+		playHUD?.beatHit();
 	}
 	
 	// rework this
@@ -2936,43 +2924,7 @@ class PlayState extends MusicBeatState
 		
 		super.sectionHit();
 		
-		callHUDFunc(hud -> hud.sectionHit());
-	}
-	
-	/**
-	 * Attempts to call a function on a event script by event name
-	 */
-	public function callEventScript(scriptName:String, func:String, args:Array<Dynamic>):Dynamic
-	{
-		if (!eventScripts.exists(scriptName)) return ScriptConstants.CONTINUE_FUNC;
-		
-		final script = eventScripts.getScript(scriptName);
-		
-		return callScript(script, func, args);
-	}
-	
-	/**
-	 * Attempts to call a function on a note script by note type
-	 */
-	public function callNoteTypeScript(noteType:String, func:String, args:Array<Dynamic>):Dynamic
-	{
-		if (!noteTypeScripts.exists(noteType)) return ScriptConstants.CONTINUE_FUNC;
-		
-		final script = noteTypeScripts.getScript(noteType);
-		
-		return callScript(script, func, args);
-	}
-	
-	/**
-	 * calls a function directly on a script if it exists
-	 */
-	public function callScript(script:FunkinScript, event:String, args:Array<Dynamic>):Dynamic
-	{
-		if (!script.exists(event)) return ScriptConstants.CONTINUE_FUNC;
-		
-		var ret:Dynamic = script.call(event, args)?.returnValue;
-		
-		return ret ?? ScriptConstants.CONTINUE_FUNC;
+		playHUD?.sectionHit();
 	}
 	
 	public var ratingName:String = '?';

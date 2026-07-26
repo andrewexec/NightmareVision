@@ -416,13 +416,9 @@ class PlayField extends FlxTypedContainer<StrumNote>
 		
 		spawnSusSplash(note, field.playerControls);
 		
+		PlayState.instance.dispatchEvent('hit', EventCache.get(NoteEvent).recycle(note));
+		
 		PlayState.instance.dispatchEvent(scriptFunc, EventCache.get(NoteEvent).recycle(note));
-		
-		// final globalScript = PlayState.instance.callNoteTypeScript(note.noteType, 'hit', scriptArgs);
-		
-		// final noteScriptRet = PlayState.instance.callNoteTypeScript(note.noteType, scriptFunc, scriptArgs);
-		
-		// if (noteScriptRet != ScriptConstants.STOP_FUNC) PlayState.instance.scripts.call(scriptFunc, scriptArgs, false, [note.noteType]);
 		
 		if (!note.isSustainNote) disposeNote(note);
 	}
@@ -452,12 +448,7 @@ class PlayField extends FlxTypedContainer<StrumNote>
 			}
 		}
 		
-		// final scriptArgs:Array<Dynamic> = [note, field.ID];
-		
 		PlayState.instance.dispatchEvent('noteMiss', EventCache.get(NoteEvent).recycle(note));
-		
-		// final noteScriptRet = PlayState.instance.callNoteTypeScript(note.noteType, 'noteMiss', scriptArgs);
-		// if (noteScriptRet != ScriptConstants.STOP_FUNC) PlayState.instance.scripts.call('noteMiss', scriptArgs, false, [note.noteType]);
 		
 		// hold note missing stuff, makes the hold unhittable (and kills it, might make it just transparent if i can fix some stuff)
 		if (!note.hitCausesMiss && !note.canMiss)
