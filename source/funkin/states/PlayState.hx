@@ -895,8 +895,6 @@ class PlayState extends MusicBeatState
 	
 	public var skipArrowStartTween:Bool = false;
 	
-	var splashLayering:Array<Dynamic> = [];
-	
 	public var screenDim:Null<FlxSprite>; // this doesnt need to be apart of playstate
 	
 	public function generatePlayfields()
@@ -958,10 +956,6 @@ class PlayState extends MusicBeatState
 			
 			strums.showRatings = true;
 			strums.noteSplashes = (lane == 0);
-			
-			final splashGrp = strums.splashLayer;
-			splashGrp.camera = camHUD;
-			splashLayering.push(splashGrp);
 			
 			if (lane == 1)
 			{
@@ -1280,9 +1274,13 @@ class PlayState extends MusicBeatState
 		add(playFields);
 		add(notes);
 		
-		for (i in splashLayering)
-			add(i);
+		for (field in playFields)
+		{
+			field.splashLayer.camera = camHUD;
 			
+			add(field.splashLayer);
+		}
+		
 		final noteData:Array<SongSection> = songData.notes;
 		
 		// loads note types
