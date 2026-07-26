@@ -321,12 +321,12 @@ class FunkinScript extends IrisEx implements IFlxDestroyable
 		
 		// for compat
 		set('HScriptState', funkin.scripting.ScriptedState);
-		set('HScriptSubstate', funkin.scripting.ScriptedSubstate);
+		set('HScriptSubState', funkin.scripting.ScriptedSubState);
 		
 		set('ScriptedState', funkin.scripting.ScriptedState);
-		set('ScriptedSubstate', funkin.scripting.ScriptedSubstate);
+		set('ScriptedSubState', funkin.scripting.ScriptedSubState);
 		
-		set("GameOverSubstate", funkin.states.substates.GameOverSubstate);
+		set("GameOverSubState", funkin.states.substates.GameOverSubState);
 		
 		// objects
 		set("Note", funkin.objects.note.Note);

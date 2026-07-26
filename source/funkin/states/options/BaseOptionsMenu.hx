@@ -9,11 +9,11 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 
 import funkin.objects.*;
-import funkin.backend.MusicBeatSubstate;
+import funkin.backend.MusicBeatSubState;
 import funkin.objects.Character;
 import funkin.objects.nodes.AttachedNode;
 
-class BaseOptionsMenu extends MusicBeatSubstate
+class BaseOptionsMenu extends MusicBeatSubState
 {
 	public var curOption:Option = null;
 	public var curSelected:Int = 0;

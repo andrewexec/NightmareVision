@@ -7,7 +7,7 @@ import extensions.flixel.FlxCameraEx;
 import extensions.flixel.FlxSoundEx;
 
 import funkin.backend.MusicBeatState;
-import funkin.backend.MusicBeatSubstate;
+import funkin.backend.MusicBeatSubState;
 import funkin.scripting.ScriptConstants;
 import funkin.audio.FunkinSound;
 import funkin.backend.Logger;

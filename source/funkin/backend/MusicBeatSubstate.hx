@@ -8,7 +8,7 @@ import funkin.input.Controls;
 import funkin.data.*;
 import funkin.scripts.*;
 
-class MusicBeatSubstate extends FlxSubState
+class MusicBeatSubState extends FlxSubState
 {
 	public function new()
 	{
@@ -79,20 +79,24 @@ class MusicBeatSubstate extends FlxSubState
 		updateCurStep();
 		updateBeat();
 		
-		if (oldStep != curStep) // fix this later
+		if (curStep > oldStep)
 		{
-			if (curStep > 0)
+			for (step in oldStep...curStep)
 			{
-				stepHit();
-				if (curStep % 4 == 0) beatHit();
+				curStep = step + 1;
+				
+				updateBeat();
+				
+				if (curStep >= 0)
+				{
+					stepHit();
+					if (curStep % 4 == 0) beatHit();
+				}
 			}
 			
-			if (PlayState.SONG != null)
-			{
-				if (oldStep < curStep) updateSection();
-				else rollbackSection();
-			}
+			if (PlayState.SONG != null) updateSection();
 		}
+		else if (PlayState.SONG != null) rollbackSection();
 		
 		dispatchEvent('onUpdate', EventCache.get(UpdateEvent).recycle(elapsed), true);
 		

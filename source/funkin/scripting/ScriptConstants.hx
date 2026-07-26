@@ -34,6 +34,6 @@ class ScriptConstants
 	 */
 	public static inline function getInstance():FlxState
 	{
-		return PlayState.instance == null ? FlxG.state : PlayState.instance.isDead ? GameOverSubstate.instance : PlayState.instance;
+		return PlayState.instance == null ? FlxG.state : PlayState.instance.isDead ? GameOverSubState.instance : PlayState.instance;
 	}
 }

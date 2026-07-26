@@ -5,11 +5,11 @@ import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxColor;
 
-import funkin.backend.MusicBeatSubstate;
+import funkin.backend.MusicBeatSubState;
 import funkin.game.shaders.*;
 import funkin.objects.*;
 
-class NotesSubState extends MusicBeatSubstate
+class NotesSubState extends MusicBeatSubState
 {
 	private static var curSelected:Int = 0;
 	private static var typeSelected:Int = 0;

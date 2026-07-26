@@ -7,7 +7,7 @@ import funkin.data.FunkinTransitionState;
 import funkin.scripts.FunkinScript;
 
 // incredibly basic. if you want to apply more to this feel free
-class BaseTransitionState extends MusicBeatSubstate
+class BaseTransitionState extends MusicBeatSubState
 {
 	public var finishCallback:Void->Void = null;
 	

@@ -50,7 +50,7 @@ import funkin.states.*;
 import funkin.objects.*;
 import funkin.objects.note.*;
 import funkin.states.editors.ui.*;
-import funkin.backend.MusicBeatSubstate;
+import funkin.backend.MusicBeatSubState;
 import funkin.states.editors.ui.ChartEditorKit;
 import funkin.audio.SyncedFlxSoundGroup;
 
@@ -2810,7 +2810,7 @@ class AttachedFlxText extends FlxText
 	}
 }
 
-class ChartingOptionsSubmenu extends MusicBeatSubstate
+class ChartingOptionsSubmenu extends MusicBeatSubState
 {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 	var menuItems:Array<String> = [

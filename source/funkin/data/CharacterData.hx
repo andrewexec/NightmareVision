@@ -473,7 +473,7 @@ typedef CharacterInfo =
 	 * If the character should hold the last frame during a sing pose
 	 */
 	var ?vslice_sustains:Bool;
-
+	
 	/**
 	 * If the character should show a ghost on double notes
 	 */
@@ -495,7 +495,7 @@ typedef CharacterInfo =
 	var ?_editor_isPlayer:Bool;
 	
 	/**
-	 * optional character to be used for `GameOverSubstate`. Has priority over the static vars
+	 * optional character to be used for `GameOverSubState`. Has priority over the static vars
 	 */
 	var ?gameover_character:String;
 	

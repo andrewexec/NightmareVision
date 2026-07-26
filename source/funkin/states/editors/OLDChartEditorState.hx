@@ -51,7 +51,7 @@ import funkin.states.*;
 import funkin.objects.*;
 import funkin.objects.note.*;
 import funkin.states.editors.ui.EditorNote;
-import funkin.backend.MusicBeatSubstate;
+import funkin.backend.MusicBeatSubState;
 import funkin.states.editors.ChartEditorState;
 
 #if sys
@@ -2397,7 +2397,7 @@ class OLDChartEditorState extends MusicBeatState
 		// 			{
 		// 				ease: FlxEase.quartOut,
 		// 				onComplete: function(shit:FlxTween) {
-		// 					openSubState(new ChartingInfoSubstate());
+		// 					openSubState(new ChartingInfoSubState());
 		// 				}
 		// 			});
 		// 	}
@@ -3848,7 +3848,7 @@ class OLDChartEditorState extends MusicBeatState
 		
 		toggleMusic(!FlxG.sound.music.playing);
 	}
-} // class ChartingInfoSubstate extends MusicBeatSubstate
+} // class ChartingInfoSubState extends MusicBeatSubState
 
 // {
 // 	var text:String = '';
@@ -3921,7 +3921,7 @@ class OLDChartEditorState extends MusicBeatState
 // 	}
 // }
 
-class ChartingOptionsSubmenuOLD extends MusicBeatSubstate
+class ChartingOptionsSubmenuOLD extends MusicBeatSubState
 {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 	var menuItems:Array<String> = [

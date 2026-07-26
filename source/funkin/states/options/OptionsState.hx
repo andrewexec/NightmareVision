@@ -28,7 +28,7 @@ class OptionsState extends MusicBeatState
 	
 	var justLeftSubState = false;
 	
-	public function openSelectedSubstate(label:String)
+	public function openSelectedSubState(label:String)
 	{
 		switch (label)
 		{
@@ -124,7 +124,7 @@ class OptionsState extends MusicBeatState
 		
 		if (controls.ACCEPT)
 		{
-			openSelectedSubstate(options[curSelected]);
+			openSelectedSubState(options[curSelected]);
 		}
 		
 		stateScripts.event('onUpdatePost', EventCache.get(UpdateEvent).recycle(elapsed), true);

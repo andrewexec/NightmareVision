@@ -7,9 +7,9 @@ import funkin.objects.Alphabet;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxColor;
 
-import funkin.backend.MusicBeatSubstate;
+import funkin.backend.MusicBeatSubState;
 
-class GameplayChangersSubstate extends MusicBeatSubstate
+class GameplayChangersSubState extends MusicBeatSubState
 {
 	private var curOption:GameplayOption = null;
 	private var curSelected:Int = 0;

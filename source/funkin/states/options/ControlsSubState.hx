@@ -17,9 +17,9 @@ import flixel.input.keyboard.FlxKey;
 import funkin.objects.*;
 import funkin.states.substates.*;
 import funkin.input.InputFormatter;
-import funkin.backend.MusicBeatSubstate;
+import funkin.backend.MusicBeatSubState;
 
-class ControlsSubState extends MusicBeatSubstate
+class ControlsSubState extends MusicBeatSubState
 {
 	public static inline final NONE:Int = -2;
 	

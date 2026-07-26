@@ -571,7 +571,7 @@ class PlayState extends MusicBeatState
 		
 		if (traceCheck) loadStart = Sys.time();
 		
-		GameOverSubstate.resetVariables();
+		GameOverSubState.resetVariables();
 		
 		scripts = new ScriptGroup(this);
 		eventScripts = new ScriptGroup(this);
@@ -1502,7 +1502,7 @@ class PlayState extends MusicBeatState
 	
 	override function openSubState(SubState:FlxSubState):Void
 	{
-		var event = dispatchEvent('onSubstateOpen', EventCache.get(StateEvent).recycle(SubState));
+		var event = dispatchEvent('onSubStateOpen', EventCache.get(StateEvent).recycle(SubState));
 		
 		if (event.cancelled)
 		{
@@ -1556,7 +1556,7 @@ class PlayState extends MusicBeatState
 			
 			resetDiscordRPC(startTimer != null && startTimer.finished);
 		}
-		scripts.call('onSubstateClose');
+		scripts.call('onSubStateClose');
 		super.closeSubState();
 	}
 	
@@ -2000,7 +2000,7 @@ class PlayState extends MusicBeatState
 				FlxTimer.globalManager.clear();
 				FlxTween.globalManager.clear();
 				
-				openSubState(new GameOverSubstate(char));
+				openSubState(new GameOverSubState(char));
 				
 				// Game Over doesn't get his own variable because it's only used here
 				if (automatedDiscord) DiscordClient.changePresence("Game Over - " + rpcDescription, rpcSongName);
