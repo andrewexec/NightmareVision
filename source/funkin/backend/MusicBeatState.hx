@@ -189,23 +189,17 @@ class MusicBeatState extends FlxUIState
 	
 	public function stepHit():Void
 	{
-		var event = EventCache.get(IntEvent).recycle(curStep);
-		dispatchEvent('onStepHit', event, true);
-		ModPlugin.instance.event('onStepHit', event, true);
+		dispatchEvent('onStepHit', EventCache.get(SongTimeEvent).recycle(curStep, curBeat, curSection), true);
 	}
 	
 	public function beatHit():Void
 	{
-		var event = EventCache.get(IntEvent).recycle(curBeat);
-		dispatchEvent('onBeatHit', event, true);
-		ModPlugin.instance.event('onBeatHit', event, true);
+		dispatchEvent('onBeatHit', EventCache.get(SongTimeEvent).recycle(curStep, curBeat, curSection), true);
 	}
 	
 	public function sectionHit():Void
 	{
-		var event = EventCache.get(IntEvent).recycle(curSection);
-		dispatchEvent('onSectionHit', event, true);
-		ModPlugin.instance.event('onSectionHit', event, true);
+		dispatchEvent('onSectionHit', EventCache.get(SongTimeEvent).recycle(curStep, curBeat, curSection), true);
 	}
 	
 	function getBeatsOnSection():Float
@@ -254,6 +248,8 @@ class MusicBeatState extends FlxUIState
 	 */
 	public function dispatchEvent<T:BasicEvent>(func:String, event:T, immutablePropogation:Bool = false):T
 	{
+		ModPlugin.instance.event(func, event, immutablePropogation);
+		
 		stateScripts.event(func, event, immutablePropogation);
 		
 		return event;

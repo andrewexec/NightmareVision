@@ -1,5 +1,7 @@
 package funkin.states;
 
+import funkin.backend.plugins.ModPlugin;
+
 import haxe.Timer;
 import haxe.ds.Vector;
 
@@ -2396,6 +2398,8 @@ class PlayState extends MusicBeatState
 	
 	override function dispatchEvent<T:BasicEvent>(func:String, event:T, immutablePropogation:Bool = false):T
 	{
+		ModPlugin.instance.event(func, event, immutablePropogation);
+		
 		eventScripts.event(func, event, immutablePropogation);
 		
 		noteTypeScripts.event(func, event, immutablePropogation);
@@ -2875,9 +2879,6 @@ class PlayState extends MusicBeatState
 		if (curStep == lastStepHit) return;
 		
 		lastStepHit = curStep;
-		scripts.set('curStep', curStep);
-		
-		scripts.call('onStepHit');
 		
 		callHUDFunc(hud -> hud.stepHit());
 	}
@@ -2906,8 +2907,6 @@ class PlayState extends MusicBeatState
 		
 		lastBeatHit = curBeat;
 		
-		scripts.set('curBeat', curBeat);
-		scripts.call('onBeatHit');
 		callHUDFunc(hud -> hud.beatHit());
 	}
 	
@@ -2937,8 +2936,6 @@ class PlayState extends MusicBeatState
 		
 		super.sectionHit();
 		
-		scripts.set('curSection', curSection);
-		scripts.call('onSectionHit');
 		callHUDFunc(hud -> hud.sectionHit());
 	}
 	
