@@ -57,7 +57,7 @@ class EventMacro
 		}
 		
 		// add recycle Function
-		var funcBlock:Array<Expr> = [macro basicRecycle(isCancellable)];
+		var funcBlock:Array<Expr> = [macro basicRecycle()];
 		
 		// add a "set this" expr for each variable
 		for (v in values)
@@ -82,27 +82,22 @@ class EventMacro
 						name: a.name,
 						type: a.type,
 						opt: false
-					}].concat([ // im gay
-					{
-						name: 'isCancellable',
-						type: macro:Null<Bool>,
-						opt: true
-					}]),
+					}],
 				expr:
 					{
 						pos: Context.currentPos(),
 						expr: EBlock(funcBlock)
 					}
 			};
-		
+			
 		fields.push(
-		{
-			pos: Context.currentPos(),
-			name: "recycle",
-			kind: FFun(func),
-			access: [APublic]
-		});
-		
+			{
+				pos: Context.currentPos(),
+				name: "recycle",
+				kind: FFun(func),
+				access: [APublic]
+			});
+			
 		return fields;
 	}
 }

@@ -3,6 +3,11 @@ package funkin.utils;
 @:nullSafety
 class ArrayUtil
 {
+	public static function isEmpty<T>(array:Array<T>):Bool
+	{
+		return array.length == 0;
+	}
+	
 	/**
 	 * Clears this array in place.
 	 * @param array

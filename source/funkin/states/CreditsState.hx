@@ -185,7 +185,7 @@ class CreditsState extends MusicBeatState
 		changeSelection();
 		super.create();
 		
-		scriptGroup.call('onCreate');
+		stateScripts.call('onCreate');
 	}
 	
 	var canInteract:Bool = true;

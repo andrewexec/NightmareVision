@@ -112,7 +112,7 @@ class MainMenuState extends MusicBeatState
 		
 		super.create();
 		
-		scriptGroup.call('onCreate');
+		stateScripts.call('onCreate');
 	}
 	
 	override function update(elapsed:Float)
@@ -143,7 +143,7 @@ class MainMenuState extends MusicBeatState
 				FlxG.switchState(TitleState.new);
 			}
 			
-			scriptGroup.set('curSelected', curSelected);
+			stateScripts.set('curSelected', curSelected);
 			
 			if (controls.ACCEPT)
 			{

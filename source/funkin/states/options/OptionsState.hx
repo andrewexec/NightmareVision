@@ -65,7 +65,7 @@ class OptionsState extends MusicBeatState
 		bg.screenCenter();
 		add(bg);
 		
-		scriptGroup.set('bg', bg);
+		stateScripts.set('bg', bg);
 		
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
@@ -87,7 +87,7 @@ class OptionsState extends MusicBeatState
 		
 		super.create();
 		
-		scriptGroup.call('onCreate', []);
+		stateScripts.call('onCreate');
 	}
 	
 	override function closeSubState()
@@ -127,7 +127,7 @@ class OptionsState extends MusicBeatState
 			openSelectedSubstate(options[curSelected]);
 		}
 		
-		scriptGroup.call('onUpdatePost', [elapsed]);
+		stateScripts.event('onUpdatePost', EventCache.get(UpdateEvent).recycle(elapsed), true);
 		justLeftSubState = false;
 	}
 	

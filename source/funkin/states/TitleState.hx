@@ -123,7 +123,7 @@ class TitleState extends MusicBeatState
 			initialized = true;
 		}
 		
-		scriptGroup.call('onCreatePost', []);
+		stateScripts.call('onCreatePost');
 	}
 	
 	override function update(elapsed:Float)
@@ -229,7 +229,7 @@ class TitleState extends MusicBeatState
 		if (!closedState)
 		{
 			sickBeats++;
-			scriptGroup.set('curBeat', sickBeats);
+			stateScripts.set('curBeat', sickBeats);
 		}
 		
 		if (logo != null)

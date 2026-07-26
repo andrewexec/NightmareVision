@@ -16,5 +16,7 @@ import funkin.scripting.EventCache;
 import funkin.scripting.events.*;
 import funkin.scripting.events.notes.*;
 
+using funkin.utils.ArrayUtil;
+
 using haxe.io.Path;
 #end

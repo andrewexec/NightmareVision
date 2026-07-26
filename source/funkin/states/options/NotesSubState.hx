@@ -31,7 +31,7 @@ class NotesSubState extends MusicBeatSubstate
 		super();
 		
 		initStateScript('NotesSubState');
-		scriptGroup.set('this', this);
+		stateScripts.set('this', this);
 		
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menus/menuDesat'));
 		bg.color = 0xFFea71fd;
@@ -78,19 +78,19 @@ class NotesSubState extends MusicBeatSubstate
 		
 		changeSelection();
 		
-		scriptGroup.set('curSelected', curSelected);
-		scriptGroup.set('typeSelected', typeSelected);
-		scriptGroup.set('grpNumbers', grpNumbers);
-		scriptGroup.set('grpNotes', grpNotes);
-		scriptGroup.set('shaderArray', shaderArray);
-		scriptGroup.set('curValue', curValue);
-		scriptGroup.set('holdTime', holdTime);
-		scriptGroup.set('nextAccept', nextAccept);
-		scriptGroup.set('blackBG', blackBG);
-		scriptGroup.set('hsbText', hsbText);
-		scriptGroup.set('posX', posX);
-		scriptGroup.set('bg', bg);
-		scriptGroup.call('onCreatePost', []);
+		stateScripts.set('curSelected', curSelected);
+		stateScripts.set('typeSelected', typeSelected);
+		stateScripts.set('grpNumbers', grpNumbers);
+		stateScripts.set('grpNotes', grpNotes);
+		stateScripts.set('shaderArray', shaderArray);
+		stateScripts.set('curValue', curValue);
+		stateScripts.set('holdTime', holdTime);
+		stateScripts.set('nextAccept', nextAccept);
+		stateScripts.set('blackBG', blackBG);
+		stateScripts.set('hsbText', hsbText);
+		stateScripts.set('posX', posX);
+		stateScripts.set('bg', bg);
+		stateScripts.call('onCreatePost');
 	}
 	
 	var changingNote:Bool = false;

@@ -26,10 +26,10 @@ import funkin.scripts.*;
 
 class PauseSubState extends MusicBeatSubstate
 {
+	public static var instance:PauseSubState;
+	
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 	var cornerTexts:Array<FlxText> = [];
-	
-	public static var instance:PauseSubState;
 	
 	var menuItems:Array<String> = [];
 	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Options', 'Exit to menu'];
@@ -170,7 +170,7 @@ class PauseSubState extends MusicBeatSubstate
 		
 		super.create();
 		
-		scriptGroup.call('onCreatePost', []);
+		stateScripts.call('onCreatePost');
 	}
 	
 	var holdTime:Float = 0;
@@ -312,7 +312,7 @@ class PauseSubState extends MusicBeatSubstate
 	
 	public function returnToMain()
 	{
-		if (!scriptGroup.event('onExit', EventCache.get(BasicEvent).basicRecycle()).cancelled)
+		if (!stateScripts.event('onExit', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
 			PlayState.deathCounter = 0;
 			PlayState.seenCutscene = false;
@@ -326,7 +326,7 @@ class PauseSubState extends MusicBeatSubstate
 	
 	public function toOptions()
 	{
-		if (!scriptGroup.event('onOptions', EventCache.get(BasicEvent).basicRecycle()).cancelled)
+		if (!stateScripts.event('onOptions', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
 			PlayState.instance.paused = true;
 			PlayState.instance.audio.volume = 0;
@@ -346,7 +346,7 @@ class PauseSubState extends MusicBeatSubstate
 	
 	public function restartSong(noTrans:Bool = false)
 	{
-		if (!scriptGroup.event('onRestart', EventCache.get(BasicEvent).basicRecycle()).cancelled)
+		if (!stateScripts.event('onRestart', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
 			PlayState.instance.paused = true;
 			FlxG.sound.music.volume = 0;
@@ -364,7 +364,7 @@ class PauseSubState extends MusicBeatSubstate
 	override function destroy()
 	{
 		pauseMusic.destroy();
-		scriptGroup.call('onDestroy', []);
+		stateScripts.call('onDestroy');
 		
 		super.destroy();
 	}
@@ -373,9 +373,7 @@ class PauseSubState extends MusicBeatSubstate
 	{
 		curSelected = FlxMath.wrap(curSelected + change, 0, menuItems.length - 1);
 		
-		var ret = scriptGroup.call('onChangeSelection', [curSelected]);
-		
-		var ev = scriptGroup.event('onChangeSelection', EventCache.get(IntEvent).recycle(curSelected));
+		var ev = stateScripts.event('onChangeSelection', EventCache.get(IntEvent).recycle(curSelected));
 		
 		if (ev.cancelled)
 		{
@@ -454,7 +452,7 @@ class PauseSubState extends MusicBeatSubstate
 		}
 		curSelected = 0;
 		changeSelection();
-		scriptGroup.call('onRegenMenu', []);
+		stateScripts.call('onRegenMenu');
 	}
 	
 	function updateSkipTextStuff()

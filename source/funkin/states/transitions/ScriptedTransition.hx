@@ -1,7 +1,6 @@
 package funkin.states.transitions;
 
 import funkin.backend.BaseTransitionState;
-import funkin.backend.MusicBeatState;
 
 class ScriptedTransition extends BaseTransitionState
 {
@@ -13,6 +12,6 @@ class ScriptedTransition extends BaseTransitionState
 		initStateScript(scriptKey, false);
 		super.create();
 		
-		scriptGroup.call('onLoad', []);
+		stateScripts.call('onLoad'); // on load ?
 	}
 }

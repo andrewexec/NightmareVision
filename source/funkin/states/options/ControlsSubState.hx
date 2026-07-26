@@ -67,7 +67,7 @@ class ControlsSubState extends MusicBeatSubstate
 			{label: "Pause", action: PAUSE},
 			null,
 		];
-
+		
 		WINDOW_GROUP = [
 			{label: "Fullscreen", action: FULLSCREEN},
 			null,
@@ -113,7 +113,7 @@ class ControlsSubState extends MusicBeatSubstate
 		add(camPos);
 		
 		initStateScript('ControlsSubState');
-		scriptGroup.set('this', this);
+		stateScripts.set('this', this);
 		
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menus/menuDesat'));
 		bg.scrollFactor.y = 0;
@@ -130,7 +130,7 @@ class ControlsSubState extends MusicBeatSubstate
 		
 		final group = new ControlsGroup("UI", UI_GROUP, group.groupLastIndex);
 		controlsGroup.add(group);
-
+		
 		final group = new ControlsGroup("WINDOW", WINDOW_GROUP, group.groupLastIndex);
 		controlsGroup.add(group);
 		
@@ -160,13 +160,13 @@ class ControlsSubState extends MusicBeatSubstate
 			optionsList[i].index = NONE;
 		}
 		
-		scriptGroup.set('device', device);
-		scriptGroup.set('optionsList', optionsList);
-		scriptGroup.set('controlsGroup', controlsGroup);
-		scriptGroup.set('resetKeysLabel', resetKeysLabel);
-		scriptGroup.set('resetGamepadLabel', resetGamepadLabel);
-		scriptGroup.set('bg', bg);
-		scriptGroup.call('onCreatePost', []);
+		stateScripts.set('device', device);
+		stateScripts.set('optionsList', optionsList);
+		stateScripts.set('controlsGroup', controlsGroup);
+		stateScripts.set('resetKeysLabel', resetKeysLabel);
+		stateScripts.set('resetGamepadLabel', resetGamepadLabel);
+		stateScripts.set('bg', bg);
+		stateScripts.call('onCreatePost');
 	}
 	
 	function refreshOptionsList()
@@ -186,7 +186,7 @@ class ControlsSubState extends MusicBeatSubstate
 			else group.visible = false;
 		}
 		if (index > optionsList.length) index = optionsList.length;
-		scriptGroup.set('optionsList', optionsList);
+		stateScripts.set('optionsList', optionsList);
 	}
 	
 	var leaving:Bool = false;
@@ -316,7 +316,7 @@ class ControlsSubState extends MusicBeatSubstate
 			this.device = device;
 			resetKeysLabel.visible = device == Keys;
 			resetGamepadLabel.visible = device != Keys;
-			scriptGroup.set('device', device);
+			stateScripts.set('device', device);
 			refreshOptionsList();
 		}
 		
@@ -458,7 +458,7 @@ class ControlsOption extends FlxSpriteContainer
 		super(x, y);
 		this.label = new Alphabet(0, 0, label, true);
 		add(this.label);
-
+		
 		binds = new FlxTypedSpriteContainer<Alphabet>(700, -55);
 		add(binds);
 		

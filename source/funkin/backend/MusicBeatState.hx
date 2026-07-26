@@ -45,11 +45,10 @@ class MusicBeatState extends FlxUIState
 	final controls:Controls = Controls.instance;
 	
 	// script related vars
-	public var scripted:Bool = false;
 	public var scriptName:String = '';
-	public var scriptGroup:ScriptGroup = new ScriptGroup();
+	public var stateScripts:ScriptGroup = new ScriptGroup();
 	
-	public function initStateScript(?scriptName:String, callOnLoad:Bool = true):Bool
+	public function initStateScript(?scriptName:String, callOnLoad:Bool = true):Void
 	{
 		if (scriptName == null)
 		{
@@ -58,30 +57,26 @@ class MusicBeatState extends FlxUIState
 		}
 		
 		final scriptFile = FunkinScript.getPath('scripts/states/$scriptName');
-		if (scriptGroup.exists(scriptFile)) return true;
+		if (stateScripts.exists(scriptFile)) return;
 		
 		this.scriptName = scriptName;
 		
 		if (FunkinAssets.exists(scriptFile))
 		{
-			var newScript = FunkinScript.fromFile(scriptFile, scriptName);
+			var newScript = FunkinScript.fromFile(scriptFile, scriptName, false, stateScripts.parent);
+			stateScripts.addScript(newScript);
+			newScript.execute();
 			if (newScript.parsingFailed())
 			{
+				stateScripts.removeScript(newScript);
 				newScript = FlxDestroyUtil.destroy(newScript);
-				return false;
+				return;
 			}
 			
-			scriptGroup.parent = this;
-			
 			Logger.log('script [$scriptName] initialized', NOTICE);
-			
-			scriptGroup.addScript(newScript);
-			scripted = true;
 		}
 		
-		if (callOnLoad) scriptGroup.call('onLoad');
-		
-		return scripted;
+		if (callOnLoad) stateScripts.call('onLoad');
 	}
 	
 	override function create()
@@ -239,16 +234,16 @@ class MusicBeatState extends FlxUIState
 	
 	override function destroy()
 	{
-		scriptGroup.call('onDestroy');
+		stateScripts.call('onDestroy');
 		
-		scriptGroup = FlxDestroyUtil.destroy(scriptGroup);
+		stateScripts = FlxDestroyUtil.destroy(stateScripts);
 		
 		super.destroy();
 	}
 	
 	override function closeSubState()
 	{
-		scriptGroup.call('onCloseSubState');
+		stateScripts.call('onCloseSubState');
 		super.closeSubState();
 	}
 	
@@ -259,7 +254,7 @@ class MusicBeatState extends FlxUIState
 	 */
 	public function dispatchEvent<T:BasicEvent>(func:String, event:T, immutablePropogation:Bool = false):T
 	{
-		scriptGroup.event(func, event, immutablePropogation);
+		stateScripts.event(func, event, immutablePropogation);
 		
 		return event;
 	}

@@ -9,21 +9,19 @@ class ScriptedState extends MusicBeatState
 	{
 		super();
 		
-		initStateScript(scriptName, false);
-		scriptGroup.parent = this;
-		scriptGroup.call('onLoad');
+		initStateScript(scriptName);
 	}
 	
 	override function create()
 	{
 		super.create();
 		
-		if (!scripted)
+		if (stateScripts.length == 0)
 		{
 			FlxG.switchState(() -> new FallbackState('failed to load ($scriptName)!\nDoes it exist?', () -> FlxG.switchState(MainMenuState.new)));
 			return;
 		}
 		
-		scriptGroup.call('onCreate');
+		stateScripts.call('onCreate');
 	}
 }

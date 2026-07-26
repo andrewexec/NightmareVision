@@ -1309,66 +1309,6 @@ class PlayState extends MusicBeatState
 		
 		var cpuTime = traceCheck ? Sys.time() : 0;
 		
-		if (ClientPrefs.inDevMode)
-		{
-			var crotchet:Float = (60000 / SONG.bpm), time:Float = 0;
-			var allNotes:Array<Array<Dynamic>> = [];
-			var sectionTimes:Array<{start:Float, end:Float}> = [];
-			
-			for (i => section in noteData)
-			{
-				if (section.changeBPM) crotchet = (60000 / section.bpm);
-				
-				var minTime:Float = time;
-				time += (crotchet * (section.sectionBeats ?? 4));
-				sectionTimes.push({start: minTime, end: time});
-				
-				for (songNotes in section.sectionNotes)
-				{
-					songNotes.push(i);
-					allNotes.push(songNotes);
-				}
-				
-				section.sectionNotes.resize(0);
-			}
-			
-			allNotes.sort(function(a, b) return (a[0] > b[0] ? 1 : -1));
-			
-			final killDifference:Float = 3;
-			
-			var lastNotes:Array<Array<Dynamic>> = [for (_ in 0...songData.keys) null];
-			var i:Int = 0, dupes:Int = 0, fixed:Int = 0;
-			
-			while (i < allNotes.length)
-			{
-				var note = allNotes[i++];
-				
-				if (note[1] >= 0)
-				{
-					var lastNote = lastNotes[note[1]];
-					if (lastNote != null && Math.abs(lastNote[0] - note[0]) < killDifference)
-					{
-						dupes++;
-						continue;
-					}
-					
-					lastNotes[note[1]] = note;
-				}
-				
-				var time:Float = (note[0] + 5);
-				var oldSection:Int = note.pop();
-				var trueSection:Int = Lambda.findIndex(sectionTimes, (section:{start:Float, end:Float}) -> (time >= section.start && time < section.end));
-				
-				if (trueSection == -1) trueSection == oldSection;
-				
-				if (trueSection != oldSection) fixed++;
-				
-				noteData[trueSection].sectionNotes.push(note);
-			}
-			
-			if (fixed > 0 || dupes > 0) trace('corrected $fixed notes / removed $dupes duplicates');
-		}
-		
 		var holdCrotchet:Float = Math.max(Conductor.stepCrotchet / holdSubdivisions, 10);
 		
 		for (section in noteData)
@@ -2456,7 +2396,14 @@ class PlayState extends MusicBeatState
 	
 	override function dispatchEvent<T:BasicEvent>(func:String, event:T, immutablePropogation:Bool = false):T
 	{
+		eventScripts.event(func, event, immutablePropogation);
+		
+		noteTypeScripts.event(func, event, immutablePropogation);
+		
+		stateScripts.event(func, event, immutablePropogation);
+		
 		scripts.event(func, event, immutablePropogation);
+		
 		return event;
 	}
 	

@@ -85,9 +85,9 @@ class FreeplayState extends MusicBeatState
 		
 		initStateScript();
 		
-		scriptGroup.set('SongMetadata', FreeplaySong); // backwards compat bs ig
-		scriptGroup.set('FreeplaySong', FreeplaySong);
-		scriptGroup.set('WeekData', WeekData);
+		stateScripts.set('SongMetadata', FreeplaySong); // backwards compat bs ig
+		stateScripts.set('FreeplaySong', FreeplaySong);
+		stateScripts.set('WeekData', WeekData);
 		
 		bg = new FlxSprite().loadGraphic(Paths.image('menus/menuDesat'));
 		add(bg);
@@ -166,7 +166,7 @@ class FreeplayState extends MusicBeatState
 		curDifficulty = Math.round(Math.max(0, Difficulty.defaultDifficulties.indexOf(lastDifficultyName)));
 		
 		super.create();
-		scriptGroup.call('onCreate', []);
+		stateScripts.call('onCreate');
 	}
 	
 	override function closeSubState()

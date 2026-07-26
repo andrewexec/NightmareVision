@@ -170,6 +170,13 @@ class ScriptGroup implements IFlxDestroyable
 		return false;
 	}
 	
+	public var length(get, never):Int;
+	
+	public inline function get_length():Int
+	{
+		return members.length;
+	}
+	
 	/**
 	 * Destroys all members
 	 */
