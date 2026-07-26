@@ -328,11 +328,6 @@ class PlayState extends MusicBeatState
 	
 	var curSong:String = "";
 	
-	/**
-	 * The minimum and max bound that health can be within
-	 */
-	public var healthBounds:FlxBounds<Float> = new FlxBounds(0.0, 2.0);
-	
 	@:isVar public var health(default, set):Float = 1;
 	
 	@:noCompletion function set_health(value:Float):Float
@@ -1697,8 +1692,7 @@ class PlayState extends MusicBeatState
 			if (FlxG.keys.anyJustPressed(debugKeysCharacter)) openCharacterEditor();
 		}
 		
-		if (healthBounds.max > healthBounds.min && health > healthBounds.max) health = healthBounds.max;
-		else if (healthBounds.min > healthBounds.max && healthBounds.max > health) health = healthBounds.max;
+		health = Math.min(health, FunkinConstants.HEALTH_MAX);
 		
 		if (startingSong)
 		{
@@ -2047,7 +2041,7 @@ class PlayState extends MusicBeatState
 	
 	function doDeathCheck(?skipHealthCheck:Bool = false):Bool
 	{
-		if ((skipHealthCheck && instakillOnMiss) || ((healthBounds.max > healthBounds.min && health <= healthBounds.min) || (healthBounds.min > healthBounds.max && health >= healthBounds.min)) && !practiceMode && !isDead)
+		if ((skipHealthCheck && instakillOnMiss) || FunkinConstants.HEALTH_MIN >= health && !practiceMode && !isDead)
 		{
 			if (!dispatchEvent('onGameOver', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 			{
