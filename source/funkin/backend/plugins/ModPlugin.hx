@@ -136,14 +136,15 @@ class ModPlugin extends FlxTypedGroup<FlxBasic>
 				}
 				
 				if (script.exists('onLoad')) script.call('onLoad');
-				if (script.exists('onInit'))
+				if (script.exists('init'))
 				{
-					var ev = script.event('onInit', new PluginInitEvent());
+					var ev = script.event('init', new PluginInitEvent());
 					
 					if (ev.name != null && ev.name.length > 0)
 					{
 						script.config.name = ev.name;
 					}
+					ev = null;
 				}
 			}
 		}
