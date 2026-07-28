@@ -144,7 +144,7 @@ class ScriptGroup implements IFlxDestroyable
 				break;
 			}
 			
-			var ret:Dynamic = script.call(func, args);
+			script.call(func, args);
 		}
 		return event;
 	}

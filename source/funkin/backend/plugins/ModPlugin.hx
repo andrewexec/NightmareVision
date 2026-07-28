@@ -5,6 +5,9 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import funkin.scripts.FunkinScript;
 import funkin.scripts.ScriptGroup;
 
+/**
+ * A FlxPlugin that handles scripted plugins
+ */
 @:nullSafety
 class ModPlugin extends FlxTypedGroup<FlxBasic>
 {
@@ -33,18 +36,16 @@ class ModPlugin extends FlxTypedGroup<FlxBasic>
 		if (!FlxG.signals.preStateSwitch.has(onStateSwitch)) FlxG.signals.preStateSwitch.add(onStateSwitch);
 	}
 	
-	override function update(elapsed:Float)
-	{
-		scripts.call('onUpdate', [elapsed]);
-		super.update(elapsed);
-	}
-	
 	override function destroy()
 	{
 		clearScripts();
 		super.destroy();
 	}
 	
+	/**
+	 * Destroys all currently loaded scripts
+	 * @param callDestroy whether to dispatch `onDestroy` to the scripts before deletion
+	 */
 	public function clearScripts(callDestroy:Bool = true)
 	{
 		scripts.clear(callDestroy);
@@ -53,17 +54,46 @@ class ModPlugin extends FlxTypedGroup<FlxBasic>
 		clear();
 	}
 	
+	/**
+	 * Gets a script plugin by name.
+	 * 
+	 * @return The `FunkinScript` instance or `null` if it could not be found.
+	 */
 	public function getPlugin(key:String):Null<FunkinScript>
 	{
 		return scripts.getScript(key);
 	}
 	
+	/**
+	 * Calls a function directly to a plugin script.
+	 * @param name 
+	 * @param func 
+	 * @param args 
+	 * @return Null<Dynamic>
+	 */
 	public function callOnPlugin(name:String, func:String, ?args:Array<Dynamic>):Null<Dynamic>
 	{
 		final script = getPlugin(name);
 		
 		if (script == null) return null;
-		return script.call(func, args).returnValue;
+		return script.call(func, args)?.returnValue;
+	}
+	
+	/**
+	 * Calls a event directly to a plugin script.
+	 * @param func 
+	 * @param event 
+	 * @param immutablePropogation 
+	 * @return T
+	 */
+	public function eventOnPlugin<T:BasicEvent>(name:String, func:String, event:T):T
+	{
+		final script = getPlugin(name);
+		
+		if (script == null) return event;
+		
+		script.event(func, event);
+		return event;
 	}
 	
 	public function call(func:String, ?args:Array<Dynamic>):Void
@@ -76,6 +106,13 @@ class ModPlugin extends FlxTypedGroup<FlxBasic>
 		return scripts.event(func, event, immutablePropogation);
 	}
 	
+	/**
+	 * Claers all scripts and loads all script within `scripts/plugins/` directory.
+	 * 
+	 * All found scripts will have `onLoad` called and `onInit`.
+	 * 
+	 * The `name` of a plugin by default is the name of the file however a custom name can be defined via the `onInit` event.
+	 */
 	public function populate()
 	{
 		clearScripts();
@@ -99,17 +136,26 @@ class ModPlugin extends FlxTypedGroup<FlxBasic>
 				}
 				
 				if (script.exists('onLoad')) script.call('onLoad');
+				if (script.exists('onInit'))
+				{
+					var ev = script.event('onInit', new PluginInitEvent());
+					
+					if (ev.name != null && ev.name.length > 0)
+					{
+						script.config.name = ev.name;
+					}
+				}
 			}
 		}
 	}
 	
 	public function onStateSwitchPost():Void
 	{
-		call('onStateSwitchPost', [FlxG.state]);
+		event('onStateSwitchPost', EventCache.get(StateEvent).recycle(FlxG.state));
 	}
 	
 	public function onStateSwitch():Void
 	{
-		call('onStateSwitch', [FlxG.state]);
+		event('onStateSwitch', EventCache.get(StateEvent).recycle(FlxG.state));
 	}
 }

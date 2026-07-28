@@ -402,4 +402,10 @@ class FunkinScript extends IrisEx implements IFlxDestroyable
 		
 		set("newShader", FunkinRuntimeShader.fromPath);
 	}
+	
+	public function event<T:BasicEvent>(func:String, event:T):T
+	{
+		call(func, [event]);
+		return event;
+	}
 }
