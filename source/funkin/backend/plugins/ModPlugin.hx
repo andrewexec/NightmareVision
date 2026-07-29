@@ -14,7 +14,7 @@ class ModPlugin extends FlxTypedGroup<FlxBasic>
 	@:nullSafety(Off)
 	public static var instance:ModPlugin;
 	
-	public static function init()
+	public static function init():Void
 	{
 		if (instance == null)
 		{
@@ -36,7 +36,7 @@ class ModPlugin extends FlxTypedGroup<FlxBasic>
 		if (!FlxG.signals.preStateSwitch.has(onStateSwitch)) FlxG.signals.preStateSwitch.add(onStateSwitch);
 	}
 	
-	override function destroy()
+	override function destroy():Void
 	{
 		clearScripts();
 		super.destroy();
@@ -46,7 +46,7 @@ class ModPlugin extends FlxTypedGroup<FlxBasic>
 	 * Destroys all currently loaded scripts
 	 * @param callDestroy whether to dispatch `onDestroy` to the scripts before deletion
 	 */
-	public function clearScripts(callDestroy:Bool = true)
+	public function clearScripts(callDestroy:Bool = true):Void
 	{
 		scripts.clear(callDestroy);
 		
@@ -109,11 +109,11 @@ class ModPlugin extends FlxTypedGroup<FlxBasic>
 	/**
 	 * Claers all scripts and loads all script within `scripts/plugins/` directory.
 	 * 
-	 * All found scripts will have `onLoad` called and `onInit`.
+	 * All found scripts will have `onLoad` called and `init`.
 	 * 
-	 * The `name` of a plugin by default is the name of the file however a custom name can be defined via the `onInit` event.
+	 * The `name` of a plugin by default is the name of the file however a custom name can be defined via the `init` event.
 	 */
-	public function populate()
+	public function populate():Void
 	{
 		clearScripts();
 		
@@ -138,13 +138,12 @@ class ModPlugin extends FlxTypedGroup<FlxBasic>
 				if (script.exists('onLoad')) script.call('onLoad');
 				if (script.exists('init'))
 				{
-					var ev = script.event('init', new PluginInitEvent());
+					var ev = script.event('init', EventCache.get(PluginInitEvent).recycle(scriptName));
 					
-					if (ev.name != null && ev.name.length > 0)
+					if (ev.name.length > 0)
 					{
 						script.config.name = ev.name;
 					}
-					ev = null;
 				}
 			}
 		}

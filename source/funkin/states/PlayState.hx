@@ -2699,7 +2699,7 @@ class PlayState extends MusicBeatState
 			
 			if (ghostTapped && anyInput)
 			{
-				scripts.call('onGhostTap', [key]);
+				scripts.event('onGhostTap', EventCache.get(KeyPressEvent).recycle(key, event));
 				
 				if (!ClientPrefs.ghostTapping)
 				{
@@ -2708,15 +2708,14 @@ class PlayState extends MusicBeatState
 						if (field.canInput()) field.onMissPress.dispatch(key);
 					}
 					
-					scripts.call('noteMissPress', [key]);
+					scripts.event('noteMissPress', EventCache.get(KeyPressEvent).recycle(key, event));
 				}
 			}
 		}
 		
 		Conductor.songPosition = prevTime;
 		
-		scripts.call('onKeyPress', [key]);
-		scripts.call('onInputPress', [key]);
+		scripts.event('onInputPress', EventCache.get(KeyPressEvent).recycle(key, event));
 	}
 	
 	function onInputRelease(event:InputEvent):Void
@@ -2741,8 +2740,8 @@ class PlayState extends MusicBeatState
 					if (splash.alive && splash.noteData == key && !splash.completed) splash.kill();
 				}
 			}
-			scripts.call('onKeyRelease', [key]);
-			scripts.call('onInputRelease', [key]);
+			
+			scripts.event('onInputRelease', EventCache.get(KeyPressEvent).recycle(key, event));
 		}
 	}
 	
