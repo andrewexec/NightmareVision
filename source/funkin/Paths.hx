@@ -54,7 +54,7 @@ class Paths
 	 * @param checkMods If true, will search through Mod directories
 	 * @return The path to the file.
 	 */
-	public static function getPath(file:String, ?parentFolder:String, checkMods:Bool = false):String
+	public static function getPath(file:String, ?parentFolder:String, checkMods:Bool = true):String
 	{
 		if (parentFolder != null) file = '$parentFolder/$file';
 		
