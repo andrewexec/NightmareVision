@@ -23,6 +23,8 @@ class Init extends FlxState
 		
 		ClientPrefs.load();
 		
+		funkin.data.ModPrefs.init();
+		
 		funkin.data.Highscore.load();
 		
 		if (FlxG.save.data.weekCompleted != null) funkin.states.StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;

@@ -169,18 +169,6 @@ class FunkinVideoSprite extends FlxVideoSprite
 		});
 	}
 	
-	// flxvideosprite already contains these 2
-	// /** Pauses the video. */
-	// public function pause()
-	// {
-	// 	if (bitmap != null) bitmap.pause();
-	// }
-	// /** Resumes the video. */
-	// public function resume()
-	// {
-	// 	if (bitmap != null) bitmap.resume();
-	// }
-	
 	/**
 	 * Adds a event to be dispatched when the video reaches its end
 	 * @param func the event to be called

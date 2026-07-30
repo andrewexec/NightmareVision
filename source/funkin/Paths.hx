@@ -427,7 +427,7 @@ class Paths
 			final folder = mods(directory);
 			if (FileSystem.exists(folder) && !folders.contains(folder)) folders.push(folder);
 			
-			if (Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
+			if (Mods.currentModDirectory.length > 0)
 			{
 				final folder = mods('${Mods.currentModDirectory}/$directory');
 				if (FileSystem.exists(folder) && !folders.contains(folder)) folders.push(folder);
@@ -461,7 +461,7 @@ class Paths
 	 */
 	public static function modFolders(key:String):String
 	{
-		if (Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
+		if (Mods.currentModDirectory.length > 0)
 		{
 			final fileToCheck:String = mods(Mods.currentModDirectory + '/' + key);
 			// trace(fileToCheck);

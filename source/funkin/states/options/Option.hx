@@ -13,7 +13,7 @@ enum abstract OptionType(String) to String from String
 	var LABEL = 'label';
 }
 
-class Option
+class Option // rewrite this
 {
 	private var child:Alphabet;
 	

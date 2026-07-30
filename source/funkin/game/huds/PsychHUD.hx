@@ -276,6 +276,9 @@ class PsychHUD extends BaseHUD
 			
 			if (ClientPrefs.timeBarType != 'Song Name') timeTxt.text = flixel.util.FlxStringUtil.formatTime(secondsTotal, false);
 		}
+		
+		final newPercent:Null<Float> = FlxMath.remapToRange(FlxMath.bound(healthBar.valueFunction(), healthBar.bounds.min, healthBar.bounds.max), healthBar.bounds.min, healthBar.bounds.max, 0, 100);
+		healthBar.percent = (newPercent != null ? newPercent : 0);
 	}
 	
 	override function beatHit()
@@ -296,11 +299,7 @@ class PsychHUD extends BaseHUD
 		iconP2.changeIcon(parent.dad.healthIcon);
 	}
 	
-	override function onHealthChange(health:Float)
-	{
-		final newPercent:Null<Float> = FlxMath.remapToRange(FlxMath.bound(healthBar.valueFunction(), healthBar.bounds.min, healthBar.bounds.max), healthBar.bounds.min, healthBar.bounds.max, 0, 100);
-		healthBar.percent = (newPercent != null ? newPercent : 0);
-	}
+	override function onHealthChange(health:Float) {}
 	
 	override function popUpScore(daRating:funkin.game.Rating, combo:Int, note:funkin.objects.note.Note)
 	{
