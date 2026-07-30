@@ -52,6 +52,42 @@ class ScriptGroup implements IFlxDestroyable
 		@:bypassAccessor this.parent = parent;
 	}
 	
+	public function addScriptFromPath(path:String, name:String, allowDupeNames:Bool = false):Null<FunkinScript>
+	{
+		if (!allowDupeNames && exists(name)) return null;
+		
+		var script:FunkinScript = FunkinScript.fromFile(path, name, false);
+		copyGroup(script);
+		script.execute();
+		
+		if (script.parsingFailed())
+		{
+			script = FlxDestroyUtil.destroy(script);
+			return null;
+		}
+		
+		addScript(script);
+		return script;
+	}
+	
+	public function addScriptFromString(str:String, name:String, allowDupeNames:Bool = false):Null<FunkinScript>
+	{
+		if (!allowDupeNames && exists(name)) return null;
+		
+		var script:FunkinScript = FunkinScript.fromString(str, name, false);
+		copyGroup(script);
+		script.execute();
+		
+		if (script.parsingFailed())
+		{
+			script = FlxDestroyUtil.destroy(script);
+			return null;
+		}
+		
+		addScript(script);
+		return script;
+	}
+	
 	/**
 	 * Adds a new script to the group.
 	 * @param script 

@@ -854,18 +854,9 @@ class PlayState extends MusicBeatState
 	 */
 	public function initFunkinScript(filePath:String, ?name:String):Null<FunkinScript>
 	{
-		if (scripts.exists(name ?? filePath)) return null;
+		var script = scripts.addScriptFromPath(filePath, name ?? filePath);
 		
-		var script:FunkinScript = FunkinScript.fromFile(filePath, name, false);
-		scripts.addScript(script);
-		script.execute();
-		
-		if (script.parsingFailed())
-		{
-			scripts.removeScript(script);
-			script = FlxDestroyUtil.destroy(script);
-			return null;
-		}
+		if (script == null) return null;
 		
 		Logger.log('script: ' + filePath + ' intialized');
 		if (script.exists('onLoad')) script.call('onLoad');
