@@ -473,7 +473,11 @@ class PlayState extends MusicBeatState
 	var debugKeysChart:Array<FlxKey>;
 	var debugKeysCharacter:Array<FlxKey>;
 	
-	public var playHUD:Null<BaseHUD> = null;
+	public var playHUD(get, never):Null<BaseHUD>;
+	
+	function get_playHUD():Null<BaseHUD> return hud;
+	
+	public var hud:Null<BaseHUD> = null;
 	
 	public var countdownPrefix:String = Paths.COUNTDOWN_PREFIX;
 	
@@ -713,9 +717,9 @@ class PlayState extends MusicBeatState
 			add(screenDim);
 		}
 		
-		playHUD = new funkin.game.huds.PsychHUD(this);
-		add(playHUD);
-		playHUD.cameras = [camHUD];
+		hud = new funkin.game.huds.PsychHUD(this);
+		add(hud);
+		hud.cameras = [camHUD];
 		
 		meta = SongMeta.getFromSong();
 		
@@ -803,7 +807,7 @@ class PlayState extends MusicBeatState
 		
 		scripts.call('onCreatePost');
 		
-		playHUD?.cachePopUpScore();
+		hud?.cachePopUpScore();
 		
 		super.create();
 		
@@ -1132,7 +1136,7 @@ class PlayState extends MusicBeatState
 		scripts.set('songLength', songLength);
 		scripts.call('onSongStart');
 		
-		playHUD?.onSongStart();
+		hud?.onSongStart();
 	}
 	
 	var noteTypeMap:Map<String, Bool> = new Map<String, Bool>();
@@ -1936,7 +1940,7 @@ class PlayState extends MusicBeatState
 	{
 		if (!dispatchEvent('onUpdateScore', EventCache.get(BasicEvent).basicRecycle()).cancelled)
 		{
-			playHUD?.onUpdateScore(songScore, funkin.utils.MathUtil.floorDecimal(ratingPercent * 100, 2), songMisses, miss);
+			hud?.onUpdateScore(songScore, funkin.utils.MathUtil.floorDecimal(ratingPercent * 100, 2), songMisses, miss);
 		}
 	}
 	
@@ -2009,7 +2013,7 @@ class PlayState extends MusicBeatState
 		scripts.set('gf', gf);
 		scripts.set('gfGroup', gfGroup);
 		
-		playHUD?.onCharacterChange();
+		hud?.onCharacterChange();
 	}
 	
 	public function triggerEventNote(event:EventNote):Void
@@ -2618,7 +2622,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		playHUD?.popUpScore(daRating, combo, note);
+		hud?.popUpScore(daRating, combo, note);
 	}
 	
 	function onInputPress(event:InputEvent):Void
@@ -2834,7 +2838,7 @@ class PlayState extends MusicBeatState
 		
 		lastStepHit = curStep;
 		
-		playHUD?.stepHit();
+		hud?.stepHit();
 	}
 	
 	var lastStepHit:Int = -1;
@@ -2861,7 +2865,7 @@ class PlayState extends MusicBeatState
 		
 		lastBeatHit = curBeat;
 		
-		playHUD?.beatHit();
+		hud?.beatHit();
 	}
 	
 	// rework this
@@ -2890,7 +2894,7 @@ class PlayState extends MusicBeatState
 		
 		super.sectionHit();
 		
-		playHUD?.sectionHit();
+		hud?.sectionHit();
 	}
 	
 	public var ratingName:String = '?';
