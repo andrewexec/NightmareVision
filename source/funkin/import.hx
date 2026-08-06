@@ -14,6 +14,7 @@ import funkin.backend.Logger;
 import funkin.utils.*;
 import funkin.scripting.EventCache;
 import funkin.scripting.events.*;
+import funkin.scripting.events.play.*;
 import funkin.scripting.events.notes.*;
 
 using funkin.utils.ArrayUtil;

@@ -1,4 +1,4 @@
-package funkin.scripting.events;
+package funkin.scripting.events.play;
 
 import funkin.objects.Character;
 

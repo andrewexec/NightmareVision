@@ -1,4 +1,4 @@
-package funkin.scripting.events;
+package funkin.scripting.events.play;
 
 import flixel.util.typeLimit.NextState;
 import flixel.FlxState;
