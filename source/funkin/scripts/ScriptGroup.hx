@@ -161,7 +161,7 @@ class ScriptGroup implements IFlxDestroyable
 	/**
 	 * `call` but specifically for events.
 	 * 
-	 * Honors a events `shouldPropogate` value.
+	 * Honors a events `shouldPropagate` value.
 	 * @param func the method to call
 	 * @return The event.
 	 */
@@ -175,7 +175,7 @@ class ScriptGroup implements IFlxDestroyable
 				continue;
 			}
 			
-			if (!event.shouldPropogate && !immutablePropogation)
+			if (!event.shouldPropagate && !immutablePropogation)
 			{
 				break;
 			}

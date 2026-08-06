@@ -13,7 +13,7 @@ class BasicEvent implements IFlxDestroyable
 	/**
 	 * Whether the event should be called on the next script.
 	 */
-	public var shouldPropogate:Bool = true;
+	public var shouldPropagate:Bool = true;
 	
 	/**
 	 * Additional data if used in scripts
@@ -33,7 +33,7 @@ class BasicEvent implements IFlxDestroyable
 	{
 		data = {};
 		cancelled = false;
-		shouldPropogate = true;
+		shouldPropagate = true;
 		
 		return this;
 	}

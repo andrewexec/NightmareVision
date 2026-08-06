@@ -348,79 +348,85 @@ class PlayField extends FlxTypedContainer<StrumNote>
 		if (field.playerControls) scriptFunc = 'goodNoteHit';
 		else scriptFunc = field.ID == 1 ? 'opponentNoteHit' : 'extraNoteHit';
 		
-		final scriptArgs:Array<Dynamic> = [note, field.ID];
+		final scriptEv = PlayState.instance.dispatchEvent(scriptFunc, EventCache.get(NoteEvent).recycle(note, field.ID));
 		
-		PlayState.instance.scripts.call('${scriptFunc}Pre', scriptArgs);
-		
-		final strum:StrumNote = field.members[note.noteData];
-		if (strum != null)
-		{
-			strum.lastNote = note;
-			if (field.playAnims) strum.playAnim('confirm', true);
+		if (!scriptEv.cancelled)
+		{ // note guts here i just hid them
+			PlayState.instance.dispatchEvent('${scriptFunc}Pre', EventCache.get(NoteEvent).recycle(note, field.ID));
 			
-			if (field.autoPlayed)
+			final strum:StrumNote = field.members[note.noteData];
+			if (strum != null)
 			{
-				var time:Float = 0.15;
-				if (note.isSustainNote && !note.isSustainEnd) time += 0.15;
-				time /= PlayState.instance.playbackRate;
+				strum.lastNote = note;
+				if (field.playAnims) strum.playAnim('confirm', true);
 				
-				strum.resetAnim = time;
-			}
-		}
-		
-		if (!note.isSustainNote)
-		{
-			for (sustain in note.tail)
-				sustain.blockHit = false; // makes the hold note active when you press the base note
-		}
-		
-		if (field.playerControls)
-		{
-			if (note.wasGoodHit || field.autoPlayed && (note.ignoreNote || note.hitCausesMiss || note.canMiss)) return;
-			
-			if (ClientPrefs.hitsoundVolume > 0 && !note.hitsoundDisabled) FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume);
-			
-			if (note.hitCausesMiss)
-			{
-				field.onNoteMiss.dispatch(note, field);
-				
-				note.wasGoodHit = true;
-				
-				if (!note.isSustainNote) disposeNote(note);
-				
-				return;
+				if (field.autoPlayed)
+				{
+					var time:Float = 0.15;
+					if (note.isSustainNote && !note.isSustainEnd) time += 0.15;
+					time /= PlayState.instance.playbackRate;
+					
+					strum.resetAnim = time;
+				}
 			}
 			
-			final susMult:Float = (note.isSustainNote ? 1 / PlayState.instance.holdSubdivisions : 1);
+			if (!note.isSustainNote)
+			{
+				for (sustain in note.tail)
+					sustain.blockHit = false; // makes the hold note active when you press the base note
+			}
 			
-			PlayState.instance.health += note.hitHealth * PlayState.instance.healthGain * susMult;
+			if (field.playerControls)
+			{
+				if (note.wasGoodHit || field.autoPlayed && (note.ignoreNote || note.hitCausesMiss || note.canMiss)) return;
+				
+				if (ClientPrefs.hitsoundVolume > 0 && !note.hitsoundDisabled) FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume);
+				
+				if (note.hitCausesMiss)
+				{
+					field.onNoteMiss.dispatch(note, field);
+					
+					note.wasGoodHit = true;
+					
+					if (!note.isSustainNote) disposeNote(note);
+					
+					return;
+				}
+				
+				final susMult:Float = (note.isSustainNote ? 1 / PlayState.instance.holdSubdivisions : 1);
+				
+				PlayState.instance.health += note.hitHealth * PlayState.instance.healthGain * susMult;
+			}
+			
+			var chars:Array<Null<Character>> = note.gfNote ? [PlayState.instance.gf] : field.singers;
+			if (note.owner != null) chars = [note.owner];
+			
+			for (char in chars)
+				if (char != null) characterSing(char, note, field.playerControls);
+				
+			note.wasGoodHit = true;
+			
+			var shouldSplash:Bool = true;
+			if (field.playerControls)
+			{
+				var ratingThing:funkin.game.Rating = funkin.game.Rating.judgeNote(note,
+					Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / PlayState.instance?.playbackRate);
+				note.rating = ratingThing;
+				shouldSplash = ratingThing.ratingMod >= 1;
+			}
+			
+			if (field.noteSplashes && shouldSplash) field.spawnSplash(note);
+			
+			spawnSusSplash(note, field.playerControls);
 		}
 		
-		var chars:Array<Null<Character>> = note.gfNote ? [PlayState.instance.gf] : field.singers;
-		if (note.owner != null) chars = [note.owner];
-		
-		for (char in chars)
-			if (char != null) characterSing(char, note, field.playerControls);
-			
-		note.wasGoodHit = true;
-		
-		var shouldSplash:Bool = true;
-		if (field.playerControls)
+		if (scriptEv.shouldPropagate)
 		{
-			var ratingThing:funkin.game.Rating = funkin.game.Rating.judgeNote(note, Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / PlayState.instance?.playbackRate);
-			note.rating = ratingThing;
-			shouldSplash = ratingThing.ratingMod >= 1;
+			PlayState.instance.dispatchEvent('hit', EventCache.get(NoteEvent).recycle(note, field.ID));
+			PlayState.instance.dispatchEvent(scriptFunc, EventCache.get(NoteEvent).recycle(note, field.ID));
 		}
 		
-		if (field.noteSplashes && shouldSplash) field.spawnSplash(note);
-		
-		spawnSusSplash(note, field.playerControls);
-		
-		PlayState.instance.dispatchEvent('hit', EventCache.get(NoteEvent).recycle(note));
-		
-		PlayState.instance.dispatchEvent(scriptFunc, EventCache.get(NoteEvent).recycle(note));
-		
-		if (!note.isSustainNote) disposeNote(note);
+		if (!scriptEv.cancelled && !note.isSustainNote) disposeNote(note);
 	}
 	
 	function noteMiss(note:Note, field:PlayField):Void
@@ -448,7 +454,7 @@ class PlayField extends FlxTypedContainer<StrumNote>
 			}
 		}
 		
-		PlayState.instance.dispatchEvent('noteMiss', EventCache.get(NoteEvent).recycle(note));
+		PlayState.instance.dispatchEvent('noteMiss', EventCache.get(NoteEvent).recycle(note, field.ID));
 		
 		// hold note missing stuff, makes the hold unhittable (and kills it, might make it just transparent if i can fix some stuff)
 		if (!note.hitCausesMiss && !note.canMiss)
@@ -530,8 +536,8 @@ class PlayField extends FlxTypedContainer<StrumNote>
 				final ghostAnim:String = char.getAnimName();
 				
 				if (!note.isSustainNote && Math.abs(char.lastHitTime - note.strumTime) < 3
-					&& char.ghostsEnabled && PlayState.instance?.scripts.event('onGhostAnim', EventCache.get(NoteEvent).recycle(note))
-					.cancelled) // && PlayState.instance?.scripts.call('onGhostAnim', [ghostAnim, note]) != ScriptConstants.STOP_FUNC)
+					&& char.ghostsEnabled && PlayState.instance?.scripts.event('onGhostAnim', EventCache.get(NoteEvent).recycle(note, note.playField?.ID))
+					.cancelled)
 				{
 					char.playGhostAnim(note.noteData, ghostAnim, true);
 				}
@@ -563,11 +569,14 @@ class PlayField extends FlxTypedContainer<StrumNote>
 				
 				var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
 				splash.setupNoteSplash(strum, note, skin, colors, this);
-				grpNoteSplashes.add(splash);
 				
-				PlayState.instance.scripts.call('onSpawnNoteSplash', [splash, note]);
+				if (!PlayState.instance.dispatchEvent('onSpawnNoteSplash', EventCache.get(SplashEvent).recycle(splash, note)).cancelled)
+				{
+					grpNoteSplashes.add(splash);
+					return note.noteSplash = splash;
+				}
 				
-				return note.noteSplash = splash;
+				splash.kill();
 			}
 		}
 		
@@ -591,11 +600,14 @@ class PlayField extends FlxTypedContainer<StrumNote>
 				
 				var splash:SustainSplash = grpSusSplashes.recycle(SustainSplash);
 				splash.setupSplash(strum, note, time, isPlayer, colors, this);
-				grpSusSplashes.add(splash);
 				
-				PlayState.instance.scripts.call('onSpawnSustainSplash', [splash, note]);
+				if (!PlayState.instance.dispatchEvent('onSpawnSustainSplash', EventCache.get(SplashEvent).recycle(splash, note)).cancelled)
+				{
+					grpSusSplashes.add(splash);
+					return note.sustainSplash = splash;
+				}
 				
-				return note.sustainSplash = splash;
+				splash.kill();
 			}
 		}
 		

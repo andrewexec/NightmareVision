@@ -1853,7 +1853,7 @@ class PlayState extends MusicBeatState
 	{
 		note.postRecycle();
 		
-		if (dispatchEvent('onSpawnNote', EventCache.get(NoteEvent).recycle(note)).cancelled)
+		if (dispatchEvent('onSpawnNote', EventCache.get(NoteEvent).recycle(note, note.playField?.ID)).cancelled)
 		{
 			note.kill();
 			
@@ -1889,7 +1889,7 @@ class PlayState extends MusicBeatState
 			notes.insert(0, note);
 			note.spawned = true;
 			
-			dispatchEvent('onSpawnNotePost', EventCache.get(NoteEvent).recycle(note));
+			dispatchEvent('onSpawnNotePost', EventCache.get(NoteEvent).recycle(note, note.playField?.ID));
 			
 			return note;
 		}
