@@ -63,7 +63,7 @@ class MusicBeatState extends FlxUIState
 		
 		if (FunkinAssets.exists(scriptFile))
 		{
-			var newScript = FunkinScript.fromFile(scriptFile, scriptName, false, stateScripts.parent);
+			var newScript = FunkinScript.fromFile(scriptFile, scriptName, false, stateScripts.scriptShareables);
 			stateScripts.addScript(newScript);
 			newScript.execute();
 			if (newScript.parsingFailed())
