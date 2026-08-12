@@ -7,11 +7,11 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 
 class ScoreEvent extends BasicEvent
 {
-	var note:Note;
-	var rating:Rating;
+	public var note:Note;
+	public var rating:Rating;
 	
-	var graphic:FlxSprite;
-	var numGrp:FlxTypedGroup<FlxSprite>;
+	public var graphic:FlxSprite;
+	public var numGrp:FlxTypedGroup<FlxSprite>;
 	
-	var combo:Int;
+	public var combo:Int;
 }
