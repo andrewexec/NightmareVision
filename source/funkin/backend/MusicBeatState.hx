@@ -237,7 +237,8 @@ class MusicBeatState extends FlxUIState
 	
 	override function closeSubState()
 	{
-		stateScripts.call('onCloseSubState');
+		dispatchEvent('onCloseSubState', EventCache.get(BasicEvent).basicRecycle(), true);
+		
 		super.closeSubState();
 	}
 	

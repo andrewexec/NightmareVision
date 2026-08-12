@@ -805,7 +805,7 @@ class PlayState extends MusicBeatState
 		
 		Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000;
 		
-		dispatchEvent('onCreatePost', EventCache.get(BasicEvent).basicRecycle());
+		scripts.call('onCreatePost');
 		
 		hud?.cachePopUpScore();
 		
@@ -2807,7 +2807,7 @@ class PlayState extends MusicBeatState
 	{
 		instance = null;
 		
-		dispatchEvent('onDestroy', EventCache.get(BasicEvent).basicRecycle());
+		scripts.call('onDestroy');
 		
 		scripts = FlxDestroyUtil.destroy(scripts);
 		eventScripts = FlxDestroyUtil.destroy(eventScripts);
