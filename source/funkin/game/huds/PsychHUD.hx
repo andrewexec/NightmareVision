@@ -179,12 +179,6 @@ class PsychHUD extends BaseHUD
 			scoreTxt._formatRanges[0].range.start = text.indexOf(parent.ratingFC);
 			scoreTxt._formatRanges[0].range.end = text.length - 2;
 		}
-		
-		// var formats = [
-		// 	new FlxTextFormatMarkerPair(new FlxTextFormat(rankColors.get(parent.ratingFC)), "<r>")
-		// ];
-		
-		// scoreTxt.applyMarkup(scoreTxt.text, formats);
 	}
 	
 	var scoreTextTwn:Null<FlxTween> = null;
@@ -309,7 +303,7 @@ class PsychHUD extends BaseHUD
 		
 		if (ClientPrefs.hideHud) return;
 		
-		parent.scripts.call('onPopUpScore', [note, daRating, ratingGraphic, ratingNumGroup]);
+		parent.dispatchEvent('onPopUpScore', EventCache.get(ScoreEvent).recycle(note, daRating, ratingGraphic, ratingNumGroup, combo), true);
 		
 		if (showRating)
 		{
@@ -379,7 +373,7 @@ class PsychHUD extends BaseHUD
 			}
 		}
 		
-		parent.scripts.call('onPopUpScorePost', [note, daRating, ratingGraphic, ratingNumGroup]);
+		parent.dispatchEvent('onPopUpScorePost', EventCache.get(ScoreEvent).recycle(note, daRating, ratingGraphic, ratingNumGroup, combo), true);
 	}
 	
 	override function cachePopUpScore()
