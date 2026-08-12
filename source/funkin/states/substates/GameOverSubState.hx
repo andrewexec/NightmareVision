@@ -100,7 +100,7 @@ class GameOverSubState extends MusicBeatSubState
 		
 		super.create();
 		
-		PlayState.instance?.scripts.call('onGameOverPost', []);
+		PlayState.instance?.dispatchEvent('onGameOverPost', EventCache.get(BasicEvent).basicRecycle());
 	}
 	
 	public function new(?character:Character)
@@ -128,7 +128,8 @@ class GameOverSubState extends MusicBeatSubState
 	
 	override function update(elapsed:Float)
 	{
-		PlayState.instance?.scripts.call('onUpdate', [elapsed]);
+		PlayState.instance?.dispatchEvent('onUpdate', EventCache.get(UpdateEvent).recycle(elapsed), true);
+		
 		super.update(elapsed);
 		
 		if (controls.ACCEPT)
@@ -174,7 +175,7 @@ class GameOverSubState extends MusicBeatSubState
 			Conductor.songPosition = FlxG.sound.music.time;
 		}
 		
-		PlayState.instance?.scripts.call('onUpdatePost', [elapsed]);
+		PlayState.instance?.dispatchEvent('onUpdatePost', EventCache.get(UpdateEvent).recycle(elapsed), true);
 	}
 	
 	/**
@@ -185,7 +186,7 @@ class GameOverSubState extends MusicBeatSubState
 	{
 		if (loopSoundName != null) FunkinSound.playMusic(Paths.music(loopSoundName), volume);
 		
-		PlayState.instance?.scripts.call('deathAnimStart', [volume]);
+		PlayState.instance?.dispatchEvent('deathAnimStart', EventCache.get(BasicEvent).basicRecycle());
 	}
 	
 	/**
@@ -209,7 +210,7 @@ class GameOverSubState extends MusicBeatSubState
 					FlxG.resetState();
 				});
 			});
-			PlayState.instance?.scripts.call('onGameOverConfirm', [true]);
+			PlayState.instance?.dispatchEvent('onGameOverConfirm', EventCache.get(BasicEvent).basicRecycle());
 		}
 	}
 	
