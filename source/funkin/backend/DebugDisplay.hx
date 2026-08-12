@@ -193,9 +193,10 @@ class DebugDisplay extends Sprite
 	function __updateText()
 	{
 		displayType = FpsDisplayMode.fromString(ClientPrefs.fpsDisplayType);
-		visible = displayType != FpsDisplayMode.DISABLED;
 		
 		if (!canUpdate || (displayType == FpsDisplayMode.DISABLED)) return;
+		
+		visible = displayType != FpsDisplayMode.DISABLED;
 		
 		#if cpp
 		var str = 'FPS: $currentFPS • [GC: ${FlxStringUtil.formatBytes(gcMemory)} | Task: ${FlxStringUtil.formatBytes(taskMemory)}]';
