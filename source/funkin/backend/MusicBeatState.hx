@@ -229,6 +229,7 @@ class MusicBeatState extends FlxUIState
 	override function destroy()
 	{
 		stateScripts.call('onDestroy');
+		ModPlugin.instance.call('onStateDestroy');
 		
 		stateScripts = FlxDestroyUtil.destroy(stateScripts);
 		

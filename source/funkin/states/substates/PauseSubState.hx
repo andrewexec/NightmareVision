@@ -75,7 +75,6 @@ class PauseSubState extends MusicBeatSubState
 			menuItemsOG.insert(shit + num, 'End Song');
 			menuItemsOG.insert(shit + num, 'Toggle Practice Mode');
 			menuItemsOG.insert(shit + num, 'Toggle Botplay');
-			// menuItemsOG.insert(shit + num, 'Hawk Tuah Respect Button -->');
 		}
 		menuItems = menuItemsOG;
 		
@@ -302,8 +301,6 @@ class PauseSubState extends MusicBeatSubState
 					PlayState.changedDifficulty = true;
 					PlayState.instance.botplayTxt.visible = PlayState.instance.cpuControlled;
 					PlayState.instance.botplayTxt.alpha = 1;
-				case 'Hawk Tuah Respect Button -->':
-					FlxG.sound.play(Paths.sound('untitled1'));
 				case "Exit to menu":
 					returnToMain();
 			}
@@ -433,21 +430,6 @@ class PauseSubState extends MusicBeatSubState
 				
 				updateSkipTextStuff();
 				updateSkipTimeText();
-			}
-			if (menuItems[i] == 'Hawk Tuah Respect Button -->')
-			{
-				var textScale:Float = 0.5;
-				item.scale.x = textScale;
-				for (letter in item.lettersArray)
-				{
-					letter.x *= textScale;
-					letter.offset.x *= textScale;
-				}
-				
-				var eyes = new HealthIcon('hawk');
-				eyes.sprTracker = item;
-				eyes.animation.curAnim.curFrame = FlxG.random.bool(12.5) ? 1 : 0;
-				add(eyes);
 			}
 		}
 		curSelected = 0;
