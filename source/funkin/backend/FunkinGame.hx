@@ -82,6 +82,7 @@ class FunkinGame extends flixel.FlxGame
 		if (_gameJustStarted) FlxG.signals.preGameStart.dispatch();
 		
 		DebugDisplay.instance?.plugins.resize(0);
+		if (DebugDisplay.instance != null) DebugDisplay.instance.deltaTimeout = 100;
 		
 		FlxG.signals.preStateCreate.dispatch(_state);
 		

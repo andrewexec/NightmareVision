@@ -1,9 +1,16 @@
 package funkin.objects;
 
 import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.graphics.frames.FlxFrame;
+import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
+
+import openfl.filters.BitmapFilter;
 
 import animate.FlxAnimateFrames;
 import animate.FlxAnimate;
+import animate.internal.RenderTexture;
+
+import funkin.graphics.FunkinFilterRenderer;
 
 class FunkinSprite extends FlxAnimate
 {
@@ -12,6 +19,27 @@ class FunkinSprite extends FlxAnimate
 	 * 
 	 * applied through `playAnim`
 	 */
+	public var filters(default, set):Null<Array<BitmapFilter>> = null;
+	
+	function set_filters(value:Null<Array<BitmapFilter>>):Null<Array<BitmapFilter>>
+	{
+		if (filters != value) _renderTextureDirty = true;
+		return filters = value;
+	}
+	
+	var filterRenderer:FunkinFilterRenderer;
+	
+	var filtered:Bool = false;
+	
+	var filterOffsets:Array<Float> = [0, 0];
+	
+	public function new(?x:Float = 0, ?y:Float = 0, ?simpleGraphic:flixel.system.FlxAssets.FlxGraphicAsset, ?settings:animate.FlxAnimateFrames.FlxAnimateSettings)
+	{
+		super(x, y, simpleGraphic, settings);
+		
+		filterRenderer = new FunkinFilterRenderer(this);
+	}
+	
 	public final animOffsets:Map<String, Array<Float>> = [];
 	
 	/**
@@ -169,7 +197,7 @@ class FunkinSprite extends FlxAnimate
 		
 		setOffsets(correctedAnim);
 	}
-
+	
 	public function setOffsets(anim:String = 'idle')
 	{
 		final animationOffsets = animOffsets.get(anim);
@@ -318,11 +346,126 @@ class FunkinSprite extends FlxAnimate
 		_transformedAnimOffset.put();
 		spriteOffset.put();
 		animOffset.put();
+		filterRenderer.destroy();
+		
+		FlxTween.cancelTweensOf(this);
 		
 		super.destroy();
 	}
 	
 	var _transformedAnimOffset:FlxPoint = FlxPoint.get();
+	
+	override function checkRenderTexture():Bool
+	{
+		if (filters != null && filters.length > 0) return true;
+		
+		return super.checkRenderTexture();
+	}
+	
+	override public function draw():Void
+	{
+		for (filter in filters ?? [])
+		{
+			@:privateAccess
+			if (filter.__renderDirty) _renderTextureDirty = true;
+		}
+		
+		super.draw();
+	}
+	
+	override function drawFrameComplex(frame:FlxFrame, camera:FlxCamera):Void
+	{
+		final willUseRenderTexture = checkRenderTexture();
+		final matrix = this._matrix;
+		
+		frame.prepareMatrix(matrix, FlxFrameAngle.ANGLE_0, checkFlipX(), checkFlipY());
+		prepareDrawMatrix(matrix, camera);
+		
+		if (willUseRenderTexture)
+		{
+			final boundsWidth:Int = Math.ceil(frame.frame.width);
+			final boundsHeight:Int = Math.ceil(frame.frame.height);
+			if (_renderTexture == null) _renderTexture = new RenderTexture(boundsWidth, boundsHeight);
+			
+			if (_renderTextureDirty)
+			{
+				_renderTexture.init(boundsWidth, boundsHeight);
+				_renderTexture.drawToCamera((camera, mat) -> {
+					camera.drawPixels(frame, framePixels, mat, null, null, antialiasing, null);
+				});
+				
+				_renderTexture.render();
+				
+				filterRenderer.applyFilters();
+				_renderTextureDirty = false;
+			}
+			
+			if (filtered)
+			{
+				matrix.translate(filterOffsets[0], filterOffsets[1]);
+				camera.drawPixels(filterRenderer.graphic?.imageFrame.frame, null, matrix, colorTransform, blend, antialiasing, shader);
+			}
+			else
+			{
+				camera.drawPixels(_renderTexture.graphic.imageFrame.frame, framePixels, matrix, colorTransform, blend, antialiasing, shader);
+			}
+		}
+		else
+		{
+			camera.drawPixels(frame, framePixels, matrix, colorTransform, blend, antialiasing, shader);
+		}
+	}
+	
+	override function drawAnimate(camera:FlxCamera):Void
+	{
+		final willUseRenderTexture = checkRenderTexture();
+		final matrix = _matrix;
+		matrix.identity();
+		
+		@:privateAccess
+		var bounds = timeline._bounds;
+		if (!willUseRenderTexture) matrix.translate(-bounds.x, -bounds.y);
+		
+		prepareAnimateMatrix(matrix, camera, bounds);
+		
+		if (renderStage) drawStage(camera);
+		
+		timeline.currentFrame = animation.frameIndex;
+		
+		#if !flash
+		if (willUseRenderTexture)
+		{
+			if (_renderTexture == null) _renderTexture = new RenderTexture(Math.ceil(bounds.width), Math.ceil(bounds.height));
+			
+			if (_renderTextureDirty)
+			{
+				_renderTexture.init(Math.ceil(bounds.width), Math.ceil(bounds.height));
+				_renderTexture.drawToCamera((camera, matrix) -> {
+					matrix.translate(-bounds.x, -bounds.y);
+					timeline.draw(camera, matrix, null, null, antialiasing, null);
+				});
+				_renderTexture.render();
+				
+				filterRenderer.applyFilters();
+				_renderTextureDirty = false;
+			}
+			
+			if (filtered)
+			{
+				matrix.translate(filterOffsets[0], filterOffsets[1]);
+				camera.drawPixels(filterRenderer.graphic?.imageFrame.frame, null, matrix, colorTransform, blend, antialiasing, shader);
+			}
+			else
+			{
+				camera.drawPixels(_renderTexture.graphic.imageFrame.frame, framePixels, matrix, colorTransform, blend, antialiasing, shader);
+			}
+		}
+		else
+		#end
+		{
+			timeline.draw(camera, matrix, colorTransform, blend, antialiasing, shader);
+		}
+	}
 	
 	override function prepareDrawMatrix(matrix:flixel.math.FlxMatrix, camera:FlxCamera):Void
 	{

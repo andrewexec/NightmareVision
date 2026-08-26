@@ -275,16 +275,18 @@ class Paths
 		return FunkinAssets.exists(getPath(key, parentFolder, checkMods));
 	}
 	
-	public static inline function getMultiAtlas(keys:Array<String>, ?parentFolder:String, allowGPU:Bool = true, checkMods:Bool = true):FlxAtlasFrames // from psych
+	public static inline function getMultiAtlas(keys:Array<String>, ?parentFolder:String, allowGPU:Bool = true, checkMods:Bool = true):Null<FlxAtlasFrames> // from psych
 	{
 		if (keys.length == 0) return null;
-		
+
 		final firstKey:Null<String> = keys.shift()?.trim();
-		
+
 		if (firstKey == null) return null;
-		
+
 		var frames = getAtlasFrames(firstKey, parentFolder, allowGPU, checkMods);
-		
+
+		if (frames == null) return null;
+
 		if (keys.length != 0)
 		{
 			final originalCollection = frames;
@@ -307,7 +309,7 @@ class Paths
 	 * 
 	 * `Sparrow` has priority.
 	 */
-	public static inline function getAtlasFrames(key:String, ?parentFolder:String, allowGPU:Bool = true, checkMods:Bool = true):FlxAtlasFrames
+	public static inline function getAtlasFrames(key:String, ?parentFolder:String, allowGPU:Bool = true, checkMods:Bool = true):Null<FlxAtlasFrames>
 	{
 		final directPath = getPath('images/$key.png', parentFolder, checkMods).withoutExtension();
 		

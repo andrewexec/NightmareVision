@@ -25,6 +25,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 		
 		var option:Option = new Option('Shaders', 'If checked, shaders will be enabled across the mod', 'shaders', BOOL, true);
+		option.onChange = ClientPrefs.refreshShaders;
 		addOption(option);
 
 		var option:Option = new Option('Anti-Aliasing', 'If unchecked, disables anti-aliasing, increases performance\nat the cost of sharper visuals.', 'globalAntialiasing', BOOL, true);

@@ -624,8 +624,19 @@ class PlayState extends MusicBeatState
 		persistentUpdate = true;
 		persistentDraw = true;
 		
-		SONG ??= Chart.fromPath(Paths.json('test/test'));
-		
+		if (SONG == null)
+		{
+			try
+			{
+				SONG = Chart.fromPath(Paths.json('test/test'));
+			}
+			catch (e)
+			{
+				Logger.log('Failed to load debug test chart: $e', ERROR);
+				SONG = Chart.fromData({song: {song: 'test', bpm: 100, notes: [], events: [], player1: 'bf', player2: 'gf'}});
+			}
+		}
+
 		Conductor.mapBPMChanges(SONG);
 		Conductor.bpm = SONG.bpm;
 		
@@ -1233,14 +1244,21 @@ class PlayState extends MusicBeatState
 		
 		if (FunkinAssets.exists(file))
 		{
-			final eventsData:Array<Dynamic> = Chart.fromPath(file).events;
-			
-			for (event in eventsData) // Event Notes
+			try
 			{
-				for (i in 0...event[1].length)
+				final eventsData:Array<Dynamic> = Chart.fromPath(file).events;
+
+				for (event in eventsData) // Event Notes
 				{
-					makeEv(event[0], event[1][i][0], event[1][i][1], event[1][i][2]);
+					for (i in 0...event[1].length)
+					{
+						makeEv(event[0], event[1][i][0], event[1][i][1], event[1][i][2]);
+					}
 				}
+			}
+			catch (e)
+			{
+				Logger.log('Failed to load events chart "$file": $e', WARN);
 			}
 		}
 		

@@ -271,7 +271,7 @@ class CharacterParser
 			if (fps != null) baseInfo.fps = fps;
 		}
 		
-		if (node.has.indices) baseInfo.indices = parseNumberRange(node.att.fps);
+		if (node.has.indices) baseInfo.indices = parseNumberRange(node.att.indices);
 		
 		return baseInfo;
 	}

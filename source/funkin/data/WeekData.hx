@@ -193,10 +193,11 @@ class WeekData
 		}
 	}
 	
-	static function getWeekFile(path:String):WeekFile
+	static function getWeekFile(path:String):Null<WeekFile>
 	{
 		final raw:Null<String> = FunkinAssets.exists(path, TEXT) ? FunkinAssets.getContent(path) : null;
-		
+		if (raw == null) return null;
+
 		return FunkinAssets.parseJson5(raw);
 	}
 	

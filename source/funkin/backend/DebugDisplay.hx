@@ -117,7 +117,7 @@ class DebugDisplay extends Sprite
 	
 	var times:Array<Float> = [];
 	
-	var deltaTimeout:Float = 0.0;
+	public var deltaTimeout:Float = 0.0;
 	
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
 	{
@@ -151,6 +151,7 @@ class DebugDisplay extends Sprite
 		if (instance == null || instance.plugins.contains(fun)) return fun;
 		
 		instance.plugins.push(fun);
+		instance.deltaTimeout = 100;
 		
 		return fun;
 	}

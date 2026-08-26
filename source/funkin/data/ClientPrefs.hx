@@ -52,7 +52,7 @@ class ClientPrefs
 	@saveVar public static var lowQuality:Bool = false;
 	
 	@saveVar public static var shaders:Bool = true;
-
+	
 	@saveVar public static var unlockedFramerate:Bool = false;
 	
 	@saveVar public static var framerate:Int = 60;
@@ -316,7 +316,7 @@ class ClientPrefs
 		{
 			@:privateAccess
 			{
-				final file = FlxSave.validate(FlxG.stage.application.meta.get('file'));
+				final file = FlxSave.validate(FlxG.stage?.application?.meta?.get('file'));
 				final path = SaveUtil.getPath('', '$file/$name');
 				
 				if (FileSystem.exists(path))
@@ -343,7 +343,7 @@ class ClientPrefs
 		
 		if (FlxG.save.data.mute != null) FlxG.sound.muted = FlxG.save.data.mute;
 		
-		if (FlxG.save.data.framerate == null) framerate = Std.int(FlxMath.bound(FlxG.stage.application.window.displayMode.refreshRate, 60, 400));
+		if (FlxG.save.data.framerate == null) framerate = Std.int(FlxMath.bound(FlxG.stage?.application?.window?.displayMode?.refreshRate ?? 60, 60, 400));
 		
 		changeFps(framerate);
 		
@@ -385,6 +385,11 @@ class ClientPrefs
 	public static function refreshVSyncMode()
 	{
 		FlxG.stage.window.setVSyncMode(ClientPrefs.vsyncMode);
+	}
+	
+	public static function refreshShaders()
+	{
+		FlxG.game.filters = ClientPrefs.shaders ? [new openfl.filters.ShaderFilter(new funkin.game.shaders.SharpenShader())] : null;
 	}
 	
 	inline public static function getGameplaySetting(name:String, defaultValue:Dynamic):Dynamic
