@@ -48,6 +48,11 @@ class Project extends HXProject
 		<assets path="projFiles/alsoft.ini" rename="alsoft.conf" type="text" unless="windows"/>
 	</section>
 
+	<define name="HXCPP_XLINUX_ARM64_CXX" value="aarch64-none-linux-gnu-g++"/>
+	<define name="HXCPP_XLINUX_ARM64_STRIP" value="aarch64-none-linux-gnu-strip"/>
+	<define name="HXCPP_XLINUX_ARM64_AR" value="aarch64-none-linux-gnu-ar"/>
+	<define name="HXCPP_XLINUX_ARM64_RANLIB" value="aarch64-none-linux-gnu-ranlib"/>
+
 	<!-- MACROS -->
 
 	<haxeflag name="--macro" value="addMetadata(\'@:build(funkin.backend.macro.FlxMacro.buildFlxSprite())\', \'flixel.FlxSprite\')" />
