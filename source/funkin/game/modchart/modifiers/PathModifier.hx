@@ -34,12 +34,12 @@ class PathModifier extends NoteModifier
 		pathData.resize(0);
 		totalDists.resize(0);
 		
-		for (dir in 0 ... path.length)
+		for (dir in 0...path.length)
 		{
 			totalDists[dir] = 0;
 			pathData[dir] = [];
 			
-			for (idx in 0 ... path[dir].length)
+			for (idx in 0...path[dir].length)
 			{
 				final pos = path[dir][idx];
 				
@@ -64,7 +64,7 @@ class PathModifier extends NoteModifier
 	}
 	
 	public function new(modMgr:ModManager, prefix:String = 'basePath', ?parent:Modifier)
-	{	
+	{
 		this.prefix = prefix;
 		
 		super(modMgr, parent);
@@ -87,7 +87,7 @@ class PathModifier extends NoteModifier
 		final progress = ((getSubmodValue('${prefix}visual', player) > 0 ? visualDiff : timeDiff) / moveSpeed * totalDist);
 		final clampProgress = FlxMath.bound(progress, 0, totalDist);
 		
-		for (idx in 0 ... daPath.length - 1)
+		for (idx in 0...daPath.length - 1)
 		{
 			final cData = daPath[idx], nData = daPath[idx + 1];
 			
@@ -96,13 +96,23 @@ class PathModifier extends NoteModifier
 				final alpha = ((cData.start - progress) / cData.dist);
 				final interpPos:Vector3 = cData.position.lerp(nData.position, alpha);
 				
-				return pos.lerp(interpPos, getValue(player));
+				lerpInto(pos, interpPos, getValue(player));
+				interpPos.put();
+				
+				return pos;
 			}
 		}
 		
 		if (daPath.length == 0) return pos;
 		
-		return pos.lerp(daPath[0].position, getValue(player));
+		lerpInto(pos, daPath[0].position, getValue(player));
+		
+		return pos;
+	}
+	
+	inline function lerpInto(pos:Vector3, goal:Vector3, alpha:Float):Void
+	{
+		pos.setTo(alpha * goal.x + pos.x * (1 - alpha), alpha * goal.y + pos.y * (1 - alpha), alpha * goal.z + pos.z * (1 - alpha));
 	}
 	
 	override function getSubmods()

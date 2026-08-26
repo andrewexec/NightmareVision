@@ -46,18 +46,21 @@ class RotateModifier extends NoteModifier
 	
 	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
 	{
-		var origin:Vector3 = Vector3.get(modMgr.getBaseX(data, player), FlxG.height * 0.5);
-		if (daOrigin != null) origin = daOrigin;
-		
+		var pooledOrigin = daOrigin == null;
+		var origin:Vector3 = pooledOrigin ? Vector3.get(modMgr.getBaseX(data, player), FlxG.height * 0.5) : daOrigin;
+
 		var diff = pos.subtract(origin);
 		var scale = FlxG.height;
 		diff.z *= scale;
 		var out = rotateV3(diff, getValue(player), getSubmodValue('${prefix}rotateY', player), getSubmodValue('${prefix}rotateZ', player));
 		out.z /= scale;
-		
+
 		origin.add(out, pos);
+
+		diff.put();
 		out.put(); // hehehehe
-		
+		if (pooledOrigin) origin.put();
+
 		return pos;
 	}
 	

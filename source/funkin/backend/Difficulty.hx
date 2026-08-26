@@ -52,4 +52,56 @@ class Difficulty
 	{
 		return difficulties[PlayState.storyMeta.difficulty] ?? defaultDifficulty;
 	}
+	
+	static final _nonDifficultyNames:Array<String> = ['events', 'meta', 'metadata', 'converted', 'chart'];
+	
+	public static function detectDifficulties(songName:String):Array<String>
+	{
+		var found:Array<String> = [];
+		
+		for (folder in ['charts', 'data'])
+		{
+			for (path in Paths.listAllFilesInDirectory('songs/$songName/$folder'))
+			{
+				if (!path.toLowerCase().endsWith('.json')) continue;
+				
+				final name = path.withoutDirectory().withoutExtension();
+				if (_nonDifficultyNames.contains(name.toLowerCase())) continue;
+				
+				final display = prettify(name);
+				if (display.length > 0 && !found.contains(display)) found.push(display);
+			}
+		}
+		
+		final sanitizedSong = Paths.sanitize(songName);
+		
+		for (path in Paths.listAllFilesInDirectory('songs/$songName'))
+		{
+			if (!path.toLowerCase().endsWith('.json')) continue;
+			
+			final name = path.withoutDirectory().withoutExtension();
+			if (!name.startsWith(sanitizedSong)) continue;
+			
+			final remainder = name.substr(sanitizedSong.length);
+			
+			var display:String;
+			if (remainder == '') display = defaultDifficulty;
+			else if (remainder.startsWith('-'))
+			{
+				final suffix = remainder.substr(1);
+				if (suffix.length == 0 || _nonDifficultyNames.contains(suffix.toLowerCase())) continue;
+				display = prettify(suffix);
+			}
+			else continue;
+			
+			if (display.length > 0 && !found.contains(display)) found.push(display);
+		}
+		
+		return found;
+	}
+	
+	static function prettify(sanitized:String):String
+	{
+		return sanitized.split('-').map(word -> word.length > 0 ? (word.charAt(0).toUpperCase() + word.substr(1)) : word).join(' ');
+	}
 }

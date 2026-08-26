@@ -303,7 +303,11 @@ class Character extends Bopper
 			holdTimer = 0;
 		}
 		
-		if (isAnimFinished() && hasAnim(getAnimName() + '-loop')) playAnim(getAnimName() + '-loop');
+		if (isAnimFinished())
+		{
+			final loopAnim = getAnimName() + '-loop';
+			if (hasAnim(loopAnim)) playAnim(loopAnim);
+		}
 		
 		if (ghostsEnabled)
 		{

@@ -297,6 +297,8 @@ class WindowUtil
 		
 		if (window == null) return;
 		
+		external.Native.setDarkMode(true);
+		
 		#if mac
 		final dpiScale = 1.0;
 		#else

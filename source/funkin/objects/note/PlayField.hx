@@ -67,6 +67,9 @@ class PlayField extends FlxTypedContainer<StrumNote>
 	public var notes:Array<Note> = [];
 	public var keyCount(default, set):Int = 0;
 	
+	var _scriptArgsScratch:Array<Dynamic> = [null, 0];
+	var _charsScratch:Array<Null<Character>> = [null];
+	
 	public var swagWidth(get, never):Float;
 	
 	public var showRatings:Bool = false;
@@ -348,7 +351,9 @@ class PlayField extends FlxTypedContainer<StrumNote>
 		if (field.playerControls) scriptFunc = 'goodNoteHit';
 		else scriptFunc = field.ID == 1 ? 'opponentNoteHit' : 'extraNoteHit';
 		
-		final scriptArgs:Array<Dynamic> = [note, field.ID];
+		_scriptArgsScratch[0] = note;
+		_scriptArgsScratch[1] = field.ID;
+		final scriptArgs = _scriptArgsScratch;
 		
 		PlayState.instance.scripts.call('${scriptFunc}Pre', scriptArgs);
 		
@@ -396,8 +401,17 @@ class PlayField extends FlxTypedContainer<StrumNote>
 			PlayState.instance.health += note.hitHealth * PlayState.instance.healthGain * susMult;
 		}
 		
-		var chars:Array<Null<Character>> = note.gfNote ? [PlayState.instance.gf] : field.singers;
-		if (note.owner != null) chars = [note.owner];
+		var chars:Array<Null<Character>> = field.singers;
+		if (note.gfNote)
+		{
+			_charsScratch[0] = PlayState.instance.gf;
+			chars = _charsScratch;
+		}
+		if (note.owner != null)
+		{
+			_charsScratch[0] = note.owner;
+			chars = _charsScratch;
+		}
 		
 		for (char in chars)
 			if (char != null) characterSing(char, note, field.playerControls);
@@ -410,8 +424,8 @@ class PlayField extends FlxTypedContainer<StrumNote>
 			var ratingThing:funkin.game.Rating = funkin.game.Rating.judgeNote(note, Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / PlayState.instance?.playbackRate);
 			note.rating = ratingThing;
 			shouldSplash = field.noteSplashes && ratingThing.ratingMod >= 1;
-		} 
-		if(shouldSplash) field.spawnSplash(note);
+		}
+		if (shouldSplash) field.spawnSplash(note);
 		
 		spawnSusSplash(note, field.playerControls);
 		
@@ -448,7 +462,9 @@ class PlayField extends FlxTypedContainer<StrumNote>
 			}
 		}
 		
-		final scriptArgs:Array<Dynamic> = [note, field.ID];
+		_scriptArgsScratch[0] = note;
+		_scriptArgsScratch[1] = field.ID;
+		final scriptArgs = _scriptArgsScratch;
 		
 		final noteScriptRet = PlayState.instance.callNoteTypeScript(note.noteType, 'noteMiss', scriptArgs);
 		if (noteScriptRet != ScriptConstants.STOP_FUNC) PlayState.instance.scripts.call('noteMiss', scriptArgs, false, [note.noteType]);
@@ -579,7 +595,7 @@ class PlayField extends FlxTypedContainer<StrumNote>
 	public function spawnSusSplash(note:Note, isPlayer:Bool = false):SustainSplash
 	{
 		if ((ClientPrefs.noteSplashType == "Both" || ClientPrefs.noteSplashType == "Hold Covers")
-			&& _skin?.sustainSplashes 
+			&& _skin?.sustainSplashes
 			&& note.tail.length > 0)
 		{
 			final strum:Null<StrumNote> = note.playField.members[note.noteData];

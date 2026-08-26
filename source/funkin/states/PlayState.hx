@@ -59,6 +59,8 @@ class PlayState extends MusicBeatState
 	 */
 	public static var instance:Null<PlayState> = null;
 	
+	static final noteFactory:Void->Note = () -> new Note();
+	
 	public static var ratingStuff:Array<RatingInfo> = [
 		new RatingInfo('You Suck!', 0.2),
 		new RatingInfo('Shit', 0.4),
@@ -578,6 +580,8 @@ class PlayState extends MusicBeatState
 		countdownSounds = true;
 		
 		instance = this;
+		
+		_keyShitPerNoteFn = keyShitPerNote;
 		
 		traceCheck = #if debug true #else false #end || #if VERBOSE_LOGS true #else false #end || ClientPrefs.inDevMode;
 		
@@ -1200,6 +1204,8 @@ class PlayState extends MusicBeatState
 		
 		var file:String = Paths.json('$songName/charts/events');
 		
+		if (!FunkinAssets.exists(file)) file = Paths.json('$songName/data/events');
+		
 		inline function makeEv(time:Float, ev:String, v1:String, v2:String)
 		{
 			final ev:EventNote =
@@ -1692,6 +1698,9 @@ class PlayState extends MusicBeatState
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
 	
+	var _elapsedArgsScratch:Array<Dynamic> = [0.0];
+	var _keyShitPerNoteFn:Note->Void;
+	
 	override public function update(elapsed:Float):Void
 	{
 		if (cameraLerping && !inCutscene)
@@ -1702,7 +1711,8 @@ class PlayState extends MusicBeatState
 		
 		if (generatedMusic && !endingSong && !isCameraOnForcedPos) moveCameraSection();
 		
-		scripts.call('onUpdate', [elapsed]);
+		_elapsedArgsScratch[0] = elapsed;
+		scripts.call('onUpdate', _elapsedArgsScratch);
 		
 		super.update(elapsed);
 		input.update();
@@ -1792,7 +1802,8 @@ class PlayState extends MusicBeatState
 			{
 				final id = playField.ID, skin = playField._skin;
 				
-				playField.forEachAlive(function(strum) modchart(strum, id, skin.receptorOffsets));
+				for (strum in playField.members)
+					if (strum != null && strum.exists && strum.alive) modchart(strum, id, skin.receptorOffsets);
 			}
 		}
 		
@@ -1884,9 +1895,14 @@ class PlayState extends MusicBeatState
 			{
 				final id = playField.ID, skin = playField._skin;
 				
-				playField.grpSusSplashes.forEachAlive(function(splash) modchart(splash, id, skin.sustainSplashOffsets));
-				
-				if (playField.trackNoteSplashes) playField.grpNoteSplashes.forEachAlive(function(splash) modchart(splash, id, skin.splashOffsets));
+				for (splash in playField.grpSusSplashes.members)
+					if (splash != null && splash.exists && splash.alive) modchart(splash, id, skin.sustainSplashOffsets);
+					
+				if (playField.trackNoteSplashes)
+				{
+					for (splash in playField.grpNoteSplashes.members)
+						if (splash != null && splash.exists && splash.alive) modchart(splash, id, skin.splashOffsets);
+				}
 			}
 		}
 		
@@ -1927,12 +1943,13 @@ class PlayState extends MusicBeatState
 			screenDim.screenCenter();
 		}
 		
-		scripts.call('onUpdatePost', [elapsed]);
+		_elapsedArgsScratch[0] = elapsed;
+		scripts.call('onUpdatePost', _elapsedArgsScratch);
 	}
 	
 	public function recycleNote(queueNote:QueueNote, ?parent:Note, ?prevNote:Note):Note
 	{
-		var note:Note = notes.recycle(Note, () -> new Note());
+		var note:Note = notes.recycle(Note, noteFactory);
 		
 		note.preRecycle(queueNote, parent, prevNote);
 		
@@ -2720,7 +2737,7 @@ class PlayState extends MusicBeatState
 				RecalculateRating(false);
 			}
 		}
-		callHUDFunc(hud -> hud.popUpScore(daRating, combo, note)); // only pushing the image bc is anyone ever gonna need anything else???
+		if (playHUD != null) playHUD.popUpScore(daRating, combo, note); // only pushing the image bc is anyone ever gonna need anything else???
 	}
 	
 	function onInputPress(event:InputEvent):Void
@@ -2834,51 +2851,7 @@ class PlayState extends MusicBeatState
 		{
 			// rewritten inputs???
 			
-			notes.forEachAlive(function(daNote:Note) {
-				// hold note functions
-				if (!daNote.playField.autoPlayed && daNote.playField.inControl && daNote.playField.playerControls)
-				{
-					if (daNote.isSustainNote
-						&& !daNote.blockHit
-						&& (input.inputPressed(daNote.noteData) || (daNote.wasGoodHit && daNote.parent.coyoteProgress < 1))
-						&& Conductor.songPosition >= daNote.strumTime
-						&& !daNote.tooLate
-						&& !daNote.wasGoodHit)
-					{
-						daNote.parent.coyoteProgress = 0;
-						daNote.playField.onNoteHit.dispatch(daNote, daNote.playField);
-					}
-				}
-				
-				// hold note drop
-				if (!daNote.playField.autoPlayed && daNote.playField.inControl && daNote.playField.playerControls)
-				{
-					if (daNote.isSustainNote
-						&& !daNote.blockHit
-						&& !daNote.ignoreNote
-						&& !input.inputPressed(daNote.noteData)
-						&& !endingSong
-						&& !daNote.wasGoodHit)
-					{
-						if (daNote.tooLate)
-						{
-							daNote.playField.onNoteMiss.dispatch(daNote, daNote.playField);
-							
-							combo = 0; // Repeat the miss code unconditionally because the actualMiss signal callback comes after the function that makes notes unable to miss
-							audio.miss();
-							
-							if (instakillOnMiss) doDeathCheck(true);
-							
-							songMisses++;
-							if (!practiceMode) songScore -= 10;
-							
-							totalPlayed++;
-							RecalculateRating(true);
-						};
-						else daNote.parent.coyoteProgress += FlxG.elapsed / 0.5;
-					}
-				}
-			});
+			notes.forEachAlive(_keyShitPerNoteFn);
 			
 			if (!left && !down && !up && !right)
 			{
@@ -2894,6 +2867,53 @@ class PlayState extends MusicBeatState
 						
 					holders.resize(0);
 				}
+			}
+		}
+	}
+	
+	function keyShitPerNote(daNote:Note):Void
+	{
+		// hold note functions
+		if (!daNote.playField.autoPlayed && daNote.playField.inControl && daNote.playField.playerControls)
+		{
+			if (daNote.isSustainNote
+				&& !daNote.blockHit
+				&& (input.inputPressed(daNote.noteData) || (daNote.wasGoodHit && daNote.parent.coyoteProgress < 1))
+				&& Conductor.songPosition >= daNote.strumTime
+				&& !daNote.tooLate
+				&& !daNote.wasGoodHit)
+			{
+				daNote.parent.coyoteProgress = 0;
+				daNote.playField.onNoteHit.dispatch(daNote, daNote.playField);
+			}
+		}
+		
+		// hold note drop
+		if (!daNote.playField.autoPlayed && daNote.playField.inControl && daNote.playField.playerControls)
+		{
+			if (daNote.isSustainNote
+				&& !daNote.blockHit
+				&& !daNote.ignoreNote
+				&& !input.inputPressed(daNote.noteData)
+				&& !endingSong
+				&& !daNote.wasGoodHit)
+			{
+				if (daNote.tooLate)
+				{
+					daNote.playField.onNoteMiss.dispatch(daNote, daNote.playField);
+					
+					combo = 0; // Repeat the miss code unconditionally because the actualMiss signal callback comes after the function that makes notes unable to miss
+					audio.miss();
+					
+					if (instakillOnMiss) doDeathCheck(true);
+					
+					songMisses++;
+					if (!practiceMode) songScore -= 10;
+					
+					totalPlayed++;
+					RecalculateRating(true);
+				};
+				else daNote.parent.coyoteProgress += FlxG.elapsed / 0.5;
 			}
 		}
 	}
@@ -2945,7 +2965,7 @@ class PlayState extends MusicBeatState
 		
 		scripts.call('onStepHit');
 		
-		callHUDFunc(hud -> hud.stepHit());
+		if (playHUD != null) playHUD.stepHit();
 	}
 	
 	var lastStepHit:Int = -1;
@@ -2974,7 +2994,7 @@ class PlayState extends MusicBeatState
 		
 		scripts.set('curBeat', curBeat);
 		scripts.call('onBeatHit');
-		callHUDFunc(hud -> hud.beatHit());
+		if (playHUD != null) playHUD.beatHit();
 	}
 	
 	// rework this
@@ -3005,7 +3025,7 @@ class PlayState extends MusicBeatState
 		
 		scripts.set('curSection', curSection);
 		scripts.call('onSectionHit');
-		callHUDFunc(hud -> hud.sectionHit());
+		if (playHUD != null) playHUD.sectionHit();
 	}
 	
 	/**

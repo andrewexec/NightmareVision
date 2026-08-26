@@ -52,7 +52,7 @@ class ClientPrefs
 	@saveVar public static var lowQuality:Bool = false;
 	
 	@saveVar public static var shaders:Bool = true;
-	
+
 	@saveVar public static var unlockedFramerate:Bool = false;
 	
 	@saveVar public static var framerate:Int = 60;

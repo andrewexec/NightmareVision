@@ -186,6 +186,7 @@ class GameOverSubstate extends MusicBeatSubstate
 	{
 		if (loopSoundName != null) FunkinSound.playMusic(Paths.music(loopSoundName), volume);
 		
+		PlayState.instance?.scripts.call('onDeathAnimStart', [volume]);
 		PlayState.instance?.scripts.call('deathAnimStart', [volume]);
 	}
 	

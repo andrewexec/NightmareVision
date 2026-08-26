@@ -3,7 +3,7 @@
     <!-- APP SETTINGS -->
     <app title="Friday Night Funkin" file="Friday Night Funkin" packageName="com.nmvTeam.nightmareEngine" package="com.nmvTeam.nightmareEngine" main="Main" version="0.2.7" company="nmvTeam"/>
 
-    <window width="1280" height="720" fps="60" background="#000000" hardware="true" vsync="false"/>
+    <window width="1280" height="720" fps="60" background="#000000" hardware="true" vsync="false" antialiasing="4"/>
     <window if="desktop" orientation="landscape" fullscreen="false" resizable="true" vsync="false"/>
 	<window unless="mac" allow-high-dpi="true"/>
 
@@ -95,6 +95,9 @@
         <haxedef name="HXCPP_TRACY_ON_DEMAND"/>
         <haxedef name="absolute-paths"/>
     </section>
+
+    <!--Generational GC (fixes those microstutter shits)-->
+    <haxedef name="HXCPP_GC_GENERATIONAL" if="cpp"/>
 
     <!--Enable for better crash handling/reporting-->
     <haxedef name="CRASH_HANDLER"/>

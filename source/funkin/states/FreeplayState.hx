@@ -601,6 +601,11 @@ class FreeplayState extends MusicBeatState
 		{
 			Difficulty.difficulties = weekDiffs;
 		}
+		else
+		{
+			final detected = Difficulty.detectDifficulties(songs[curSelected].songName);
+			if (detected.length > 0) Difficulty.difficulties = detected;
+		}
 		
 		if (Difficulty.difficulties.contains(Difficulty.defaultDifficulty))
 		{

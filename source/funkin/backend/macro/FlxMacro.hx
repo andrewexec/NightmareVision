@@ -307,7 +307,7 @@ class FlxMacro
 	{
 		var cls:haxe.macro.Type.ClassType = Context.getLocalClass().get();
 		var fields:Array<haxe.macro.Expr.Field> = Context.getBuildFields();
-		
+
 		for (field in fields)
 		{
 			switch (field.name)

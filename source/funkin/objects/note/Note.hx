@@ -117,6 +117,8 @@ class Note extends FunkinSprite implements funkin.game.modchart.IModNote
 	
 	public var noteScript:Null<FunkinScript> = null;
 	
+	var __updateScriptArgs:Array<Dynamic> = [null, 0.0];
+	
 	public var visualTime:Float = 0;
 	public var visualLength:Float = 0;
 	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
@@ -587,7 +589,9 @@ class Note extends FunkinSprite implements funkin.game.modchart.IModNote
 		
 		if (!inEditor)
 		{
-			noteScript?.executeFunc("update", [this, elapsed], this);
+			__updateScriptArgs[0] = this;
+			__updateScriptArgs[1] = elapsed;
+			noteScript?.executeFunc("update", __updateScriptArgs, this);
 		}
 		
 		if (rgbGraphics != null)

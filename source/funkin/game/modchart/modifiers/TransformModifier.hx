@@ -1,5 +1,15 @@
 package funkin.game.modchart.modifiers;
 
+typedef TransformKeyNames =
+{
+	xName:String,
+	xAName:String,
+	yName:String,
+	yAName:String,
+	zName:String,
+	zAName:String
+}
+
 class TransformModifier extends NoteModifier
 { // this'll be transformX in ModManager
 	inline function lerp(a:Float, b:Float, c:Float)
@@ -11,15 +21,37 @@ class TransformModifier extends NoteModifier
 	
 	override function getOrder() return Modifier.ModifierOrder.LAST;
 	
+	var _keyNamesCache:Map<Int, TransformKeyNames> = new Map();
+	
+	function getKeyNames(data:Int):TransformKeyNames
+	{
+		var names = _keyNamesCache.get(data);
+		if (names == null)
+		{
+			names =
+				{
+					xName: 'transform${data}X',
+					xAName: 'transform${data}X-a',
+					yName: 'transform${data}Y',
+					yAName: 'transform${data}Y-a',
+					zName: 'transform${data}Z',
+					zAName: 'transform${data}Z-a'
+				};
+			_keyNamesCache.set(data, names);
+		}
+		return names;
+	}
+	
 	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
 	{
 		pos.x += getValue(player) + getSubmodValue("transformX-a", player);
 		pos.y += getSubmodValue("transformY", player) + getSubmodValue("transformY-a", player);
 		pos.z += getSubmodValue('transformZ', player) + getSubmodValue("transformZ-a", player);
 		
-		pos.x += getSubmodValue('transform${data}X', player) + getSubmodValue('transform${data}X-a', player);
-		pos.y += getSubmodValue('transform${data}Y', player) + getSubmodValue('transform${data}Y-a', player);
-		pos.z += getSubmodValue('transform${data}Z', player) + getSubmodValue('transform${data}Z-a', player);
+		final names = getKeyNames(data);
+		pos.x += getSubmodValue(names.xName, player) + getSubmodValue(names.xAName, player);
+		pos.y += getSubmodValue(names.yName, player) + getSubmodValue(names.yAName, player);
+		pos.z += getSubmodValue(names.zName, player) + getSubmodValue(names.zAName, player);
 		
 		return pos;
 	}
