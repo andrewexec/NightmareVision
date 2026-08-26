@@ -12,8 +12,8 @@ package external.memory;
 extern class Memory
 {
 	/**
-	 * Returns the current resident set size (physical memory use) measured
-	 * in bytes, or zero if the value cannot be determined on this OS.
+	 * Returns the process's current private memory footprint,
+	 * measured in bytes, or zero if the value cannot be determined on this OS.
 	 */
 	@:native("getCurrentRSS")
 	public static function getCurrentUsage():cpp.UInt64;

@@ -137,7 +137,7 @@ class FunkinVideoSprite extends FlxVideoSprite
 	function set_volume(value:Float):Float
 	{
 		value = FlxMath.bound(value, 0.0, 1.0);
-		if (bitmap != null) bitmap.volume = Std.int(value * 100);
+		if (bitmap != null) bitmap.volumeAdjust = value;
 		return volume = value;
 	}
 	

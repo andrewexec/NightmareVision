@@ -2,4 +2,7 @@
 	<files id='haxe'>
 		<compilervalue name="-I" value="${this_dir}" />
 	</files>
+	<target id="haxe">
+		<lib name="ntdll.lib" if="windows" />
+	</target>
 </xml>
