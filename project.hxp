@@ -48,28 +48,6 @@ class Project extends HXProject
 		<assets path="projFiles/alsoft.ini" rename="alsoft.conf" type="text" unless="windows"/>
 	</section>
 
-	<!-- HAXE LIBS -->
-	<haxelib name="openfl"/>
-	<haxelib name="flixel"/>
-	<haxelib name="flixel-addons"/>
-	<haxelib name="flixel-ui" version="2.6.4"/>
-	<haxelib name="flixel-animate"/>
-
-	<haxelib name="hscript-iris" version="git"/>
-
-	<haxelib name="moonchart"/>
-
-	<haxelib name="haxeui-core"/>
-	<haxelib name="haxeui-flixel"/>
-
-	<haxelib name="funkin.vis"/>
-	<haxelib name="grig.audio"/>
-
-	<haxelib name="json5hx"/>
-
-	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED" version="1.3.0"/>
-	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/>
-
 	<!-- MACROS -->
 
 	<haxeflag name="--macro" value="addMetadata(\'@:build(funkin.backend.macro.FlxMacro.buildFlxSprite())\', \'flixel.FlxSprite\')" />
@@ -147,5 +125,33 @@ class Project extends HXProject
 		super();
 
 		includeXML(CONFIG_XML);
+
+		// `<haxelib>` tags are deliberately NOT in CONFIG_XML above: includeXML() merges each
+		// haxelib's own bundled project data (assets, ndlls, etc.) immediately while parsing the
+		// XML, and the .hxp harness (HXProject.fromFile -> processHaxelibs) ALSO merges every
+		// entry in `haxelibs` a second time after this constructor returns. Doing both would
+		// double-merge each library's assets (e.g. flixel's default sound library), which fails
+		// the build with "Name ... is already defined in this module". Registering the raw
+		// Haxelib entries here (no manual merge) lets processHaxelibs perform the one merge pass.
+		addHaxelibs();
+	}
+
+	function addHaxelibs():Void
+	{
+		haxelibs.push(new Haxelib('openfl'));
+		haxelibs.push(new Haxelib('flixel'));
+		haxelibs.push(new Haxelib('flixel-addons'));
+		haxelibs.push(new Haxelib('flixel-ui', '2.6.4'));
+		haxelibs.push(new Haxelib('flixel-animate'));
+		haxelibs.push(new Haxelib('hscript-iris', 'git'));
+		haxelibs.push(new Haxelib('moonchart'));
+		haxelibs.push(new Haxelib('haxeui-core'));
+		haxelibs.push(new Haxelib('haxeui-flixel'));
+		haxelibs.push(new Haxelib('funkin.vis'));
+		haxelibs.push(new Haxelib('grig.audio'));
+		haxelibs.push(new Haxelib('json5hx'));
+
+		if (defines.exists('DISCORD_ALLOWED')) haxelibs.push(new Haxelib('hxdiscord_rpc', '1.3.0'));
+		if (defines.exists('VIDEOS_ALLOWED')) haxelibs.push(new Haxelib('hxvlc'));
 	}
 }
