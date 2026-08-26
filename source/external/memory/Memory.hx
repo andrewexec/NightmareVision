@@ -12,7 +12,7 @@ package external.memory;
 extern class Memory
 {
 	/**
-	 * Returns the process's current private memory footprint,
+	 * Returns the process's current resident (physical) memory footprint,
 	 * measured in bytes, or zero if the value cannot be determined on this OS.
 	 */
 	@:native("getCurrentRSS")

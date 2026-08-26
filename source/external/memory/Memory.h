@@ -13,36 +13,6 @@
 
 #include <windows.h>
 #include <psapi.h>
-#include <winternl.h>
-#pragma comment(lib, "ntdll.lib")
-
-#ifndef NT_SUCCESS
-#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
-#endif
-
-// https://github.com/winsiderss/systeminformer/blob/v3.2.25011.2103/SystemInformer/procprv.c
-typedef struct _VM_COUNTERS_EX_LOCAL
-{
-	SIZE_T PeakVirtualSize;
-	SIZE_T VirtualSize;
-	ULONG PageFaultCount;
-	SIZE_T PeakWorkingSetSize;
-	SIZE_T WorkingSetSize;
-	SIZE_T QuotaPeakPagedPoolUsage;
-	SIZE_T QuotaPagedPoolUsage;
-	SIZE_T QuotaPeakNonPagedPoolUsage;
-	SIZE_T QuotaNonPagedPoolUsage;
-	SIZE_T PagefileUsage;
-	SIZE_T PeakPagefileUsage;
-	SIZE_T PrivateUsage;
-} VM_COUNTERS_EX_LOCAL;
-
-static bool memory_isRunningUnderWine()
-{
-	HMODULE ntdll = GetModuleHandleA("ntdll.dll");
-	if (!ntdll) return false;
-	return GetProcAddress(ntdll, "wine_get_version") != NULL;
-}
 
 #elif defined(__unix__) || defined(__unix) || defined(unix) || (defined(__APPLE__) && defined(__MACH__))
 #include <unistd.h>
@@ -67,25 +37,16 @@ static bool memory_isRunningUnderWine()
 
 
 /**
- * Returns the current memory footprint of the process measured in bytes, or
- * zero if the value cannot be determined on this OS.
+ * Returns the current resident (physical) memory footprint of the process
+ * measured in bytes, or zero if the value cannot be determined on this OS.
  */
 size_t getCurrentRSS( )
 {
 #if defined(_WIN32)
     /* Windows -------------------------------------------------- */
-    // https://github.com/winsiderss/systeminformer/blob/v3.2.25011.2103/SystemInformer/procprv.c
-    VM_COUNTERS_EX_LOCAL counters = {0};
-    NTSTATUS status = NtQueryInformationProcess(
-        GetCurrentProcess(),
-        (PROCESSINFOCLASS)3, // ProcessVmCounters
-        &counters,
-        sizeof(counters),
-        NULL
-    );
-    if (NT_SUCCESS(status))
-        return (size_t)(memory_isRunningUnderWine() ? counters.PagefileUsage : counters.PrivateUsage);
-    return (size_t)0L;
+    PROCESS_MEMORY_COUNTERS info;
+    GetProcessMemoryInfo( GetCurrentProcess( ), &info, sizeof(info) );
+    return (size_t)info.WorkingSetSize;
 
 #elif defined(__APPLE__) && defined(__MACH__)
     /* OSX ------------------------------------------------------ */
