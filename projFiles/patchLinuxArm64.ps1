@@ -39,11 +39,10 @@ function Patch-File($path, $marker, $edits) {
 }
 
 $linuxPlatformHx = Join-Path $repoRoot '.haxelib\lime\git\tools\platforms\LinuxPlatform.hx'
+
 Patch-File $linuxPlatformHx 'isArm64' @(
     @{
         Find = @'
-	public override function build():Void
-	{
 		var hxml = targetDirectory + "/haxe/" + buildType + ".hxml";
 
 		System.mkdir(targetDirectory);
@@ -73,8 +72,6 @@ Patch-File $linuxPlatformHx 'isArm64' @(
 		}
 '@
         Replace = @'
-	public override function build():Void
-	{
 		var hxml = targetDirectory + "/haxe/" + buildType + ".hxml";
 
 		System.mkdir(targetDirectory);
@@ -412,6 +409,7 @@ Write-Host ""
 Write-Host "Recompiling lime's run.n and hxcpp's hxcpp.n from patched source..."
 
 Push-Location (Join-Path $repoRoot '.haxelib\lime\git\tools')
+
 $formatInstalled = (haxelib list format) -match '^format:'
 if (-not $formatInstalled) { haxelib install format }
 haxe tools.hxml

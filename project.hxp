@@ -146,7 +146,7 @@ class Project extends HXProject
 		haxelibs.push(new Haxelib('openfl'));
 		haxelibs.push(new Haxelib('flixel'));
 		haxelibs.push(new Haxelib('flixel-addons'));
-		haxelibs.push(new Haxelib('flixel-ui', '2.6.4'));
+		haxelibs.push(new Haxelib('flixel-ui', '2.6.5'));
 		haxelibs.push(new Haxelib('flixel-animate'));
 		haxelibs.push(new Haxelib('hscript-iris', 'git'));
 		haxelibs.push(new Haxelib('moonchart'));
