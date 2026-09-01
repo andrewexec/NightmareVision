@@ -412,40 +412,42 @@ class Paths
 	public static function listAllFilesInDirectory(directory:String, checkMods:Bool = true) // based of psychs Mods.directoriesWithFile
 	{
 		// todo maybe make this recursive ?
-		var folders:Array<String> = [];
+		var folders:Array<{path:String, mod:Null<String>}> = [];
 		var files:Array<String> = [];
-		
-		if (FunkinAssets.exists(getCorePath(directory))) folders.push(getCorePath(directory));
-		
+
+		if (FunkinAssets.exists(getCorePath(directory))) folders.push({path: getCorePath(directory), mod: null});
+
 		#if MODS_ALLOWED
 		if (checkMods)
 		{
 			for (mod in Mods.globalMods)
 			{
 				final folder = mods('$mod/$directory');
-				if (FileSystem.exists(folder) && !folders.contains(folder)) folders.push(folder);
+				if (FileSystem.exists(folder) && !Lambda.exists(folders, f -> f.path == folder)) folders.push({path: folder, mod: mod});
 			}
-			
+
 			final folder = mods(directory);
-			if (FileSystem.exists(folder) && !folders.contains(folder)) folders.push(folder);
-			
+			if (FileSystem.exists(folder) && !Lambda.exists(folders, f -> f.path == folder)) folders.push({path: folder, mod: null});
+
 			if (Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
 			{
 				final folder = mods('${Mods.currentModDirectory}/$directory');
-				if (FileSystem.exists(folder) && !folders.contains(folder)) folders.push(folder);
+				if (FileSystem.exists(folder) && !Lambda.exists(folders, f -> f.path == folder)) folders.push({path: folder, mod: Mods.currentModDirectory});
 			}
 		}
 		#end
-		
-		for (folder in folders)
+
+		for (entry in folders)
 		{
-			for (file in FunkinAssets.readDirectory(folder))
+			for (file in FunkinAssets.readDirectory(entry.path))
 			{
-				final path = Path.join([folder, file]);
+				if (entry.mod != null && Mods.isFileIgnored(entry.mod, '$directory/$file')) continue;
+
+				final path = Path.join([entry.path, file]);
 				if (!files.contains(path)) files.push(path);
 			}
 		}
-		
+
 		return files;
 	}
 	
@@ -463,7 +465,7 @@ class Paths
 	 */
 	public static function modFolders(key:String):String
 	{
-		if (Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
+		if (Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0 && !Mods.isFileIgnored(Mods.currentModDirectory, key))
 		{
 			final fileToCheck:String = mods(Mods.currentModDirectory + '/' + key);
 			// trace(fileToCheck);
@@ -472,9 +474,10 @@ class Paths
 				return fileToCheck;
 			}
 		}
-		
+
 		for (mod in Mods.globalMods)
 		{
+			if (Mods.isFileIgnored(mod, key)) continue;
 			final fileToCheck:String = mods(mod + '/' + key);
 			if (FileSystem.exists(fileToCheck)) return fileToCheck;
 		}

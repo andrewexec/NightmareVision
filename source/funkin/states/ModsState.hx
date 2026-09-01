@@ -155,7 +155,10 @@ class ModsState extends MusicBeatState
 		name.setPosition(icon.x + icon.width + 10, icon.y + (icon.height - name.height) / 2);
 		
 		var text = (pack == null || pack.description == null) ? "No description provided." : pack.description;
-		
+
+		var issues = Mods.getModIssues(modList[curDir].folder);
+		if (issues.length > 0) text += '\n\n[!] ' + issues.join('\n[!] ');
+
 		description.text = text;
 		description.setPosition(box.x + 10, box.y + 65);
 		

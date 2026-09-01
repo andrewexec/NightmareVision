@@ -24,7 +24,7 @@ class Init extends FlxState
 		ClientPrefs.load();
 		
 		funkin.data.Highscore.load();
-		
+
 		if (FlxG.save.data.weekCompleted != null) funkin.states.StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 		
 		FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
@@ -64,9 +64,9 @@ class Init extends FlxState
 		funkin.backend.plugins.ModPlugin.init();
 		
 		funkin.backend.plugins.DebugTextPlugin.init();
-		
+
 		funkin.backend.plugins.FullScreenPlugin.init();
-		
+
 		#if VIDEOS_ALLOWED
 		funkin.video.FunkinVideoSprite.init();
 		#end

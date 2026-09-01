@@ -633,10 +633,18 @@ class PlayState extends MusicBeatState
 			catch (e)
 			{
 				Logger.log('Failed to load debug test chart: $e', ERROR);
-				SONG = Chart.fromData({song: {song: 'test', bpm: 100, notes: [], events: [], player1: 'bf', player2: 'gf'}});
+				SONG = Chart.fromData({song:
+					{
+						song: 'test',
+						bpm: 100,
+						notes: [],
+						events: [],
+						player1: 'bf',
+						player2: 'gf'
+					}});
 			}
 		}
-
+		
 		Conductor.mapBPMChanges(SONG);
 		Conductor.bpm = SONG.bpm;
 		
@@ -1232,7 +1240,7 @@ class PlayState extends MusicBeatState
 			try
 			{
 				final eventsData:Array<Dynamic> = Chart.fromPath(file).events;
-
+				
 				for (event in eventsData) // Event Notes
 				{
 					for (i in 0...event[1].length)
@@ -2625,7 +2633,7 @@ class PlayState extends MusicBeatState
 			var percent:Float = ratingPercent;
 			if (Math.isNaN(percent)) percent = 0;
 			Highscore.saveScore(SONG.song, songScore, storyMeta.difficulty, percent);
-			
+
 			if (chartingMode)
 			{
 				openChartEditor();
