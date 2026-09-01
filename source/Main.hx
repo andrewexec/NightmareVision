@@ -18,6 +18,9 @@ class Main extends Sprite
 	public static final PSYCH_VERSION:String = '0.5.2h';
 	public static final NMV_VERSION:String = '1.0';
 	public static final FUNKIN_VERSION:String = '0.2.7';
+
+	public static var audioDisconnected:Bool = false;
+	public static var noTerminalColor:Bool = false;
 	
 	public static final startMeta =
 		{
