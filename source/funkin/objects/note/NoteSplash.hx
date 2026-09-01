@@ -9,7 +9,7 @@ import funkin.states.*;
 import funkin.data.NoteSkin;
 
 // @:nullSafety
-class NoteSplash extends FunkinSprite implements funkin.game.modchart.IModNote
+class NoteSplash extends funkin.game.modchart.ModchartNote
 {
 	/**
 	 * Colors applied to the notesplash to support custom colours
@@ -20,8 +20,6 @@ class NoteSplash extends FunkinSprite implements funkin.game.modchart.IModNote
 	 * The notedata of the splash
 	 */
 	public var data(get, set):Int;
-	
-	public var noteData:Int = 0;
 	
 	public var player:Int = 0;
 	

@@ -107,7 +107,7 @@ class ScriptGroup implements IFlxDestroyable
 			}
 			
 			var ret:Dynamic = i.call(event, args)?.returnValue;
-			if (ret != null)
+			if (ret is Int)
 			{
 				if (ret == ScriptConstants.HALT_FUNC)
 				{

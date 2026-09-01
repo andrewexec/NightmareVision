@@ -4,12 +4,11 @@ import funkin.data.*;
 import funkin.objects.Bopper;
 import funkin.game.shaders.RGBShader;
 
-class SustainSplash extends FunkinSprite implements funkin.game.modchart.IModNote
+class SustainSplash extends funkin.game.modchart.ModchartNote
 {
 	public var rgbGraphics:RGBGraphics = new RGBGraphics();
 	
 	public var data(get, set):Int;
-	public var noteData:Int = 0;
 	
 	public var player:Int = 0;
 	

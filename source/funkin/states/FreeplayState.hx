@@ -1,5 +1,7 @@
 package funkin.states;
 
+import funkin.input.TurboControl;
+import funkin.input.TurboControl.TurboControlGroup;
 import funkin.backend.FallbackState;
 import funkin.states.editors.ChartConverterState;
 import funkin.data.Chart.ChartFormat;
@@ -63,6 +65,10 @@ class FreeplayState extends MusicBeatState
 	
 	var mayGoToChartConverter:Bool = false;
 	
+	var turboGroup:TurboControlGroup;
+	var turboDown:TurboControl;
+	var turboUp:TurboControl;
+	
 	override function create()
 	{
 		FunkinAssets.cache.clearStoredMemory();
@@ -72,6 +78,15 @@ class FreeplayState extends MusicBeatState
 		WeekData.reloadWeekFiles(false);
 		
 		DiscordClient.changePresence("In the Menus");
+		
+		turboGroup = new TurboControlGroup();
+		add(turboGroup);
+		
+		turboDown = TurboControl.fromAction('ui_down');
+		turboGroup.add(turboDown);
+		
+		turboUp = TurboControl.fromAction('ui_up');
+		turboGroup.add(turboUp);
 		
 		loadFreeplayData();
 		
@@ -242,8 +257,6 @@ class FreeplayState extends MusicBeatState
 	
 	var instPlaying:Int = -1;
 	
-	var holdTime:Float = 0;
-	
 	override function update(elapsed:Float)
 	{
 		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7)
@@ -290,28 +303,10 @@ class FreeplayState extends MusicBeatState
 		
 		if (songs.length > 1)
 		{
-			if (controls.UI_UP_P)
+			if (turboDown.PRESSED || turboUp.PRESSED)
 			{
-				changeSelection(-shiftMult);
-				holdTime = 0;
-			}
-			if (controls.UI_DOWN_P)
-			{
-				changeSelection(shiftMult);
-				holdTime = 0;
-			}
-			
-			if (controls.UI_DOWN || controls.UI_UP)
-			{
-				var checkLastHold:Int = Math.floor((holdTime - 0.5) * 10);
-				holdTime += elapsed;
-				var checkNewHold:Int = Math.floor((holdTime - 0.5) * 10);
-				
-				if (holdTime > 0.5 && checkNewHold - checkLastHold > 0)
-				{
-					changeSelection((checkNewHold - checkLastHold) * (controls.UI_UP ? -shiftMult : shiftMult));
-					changeDiff();
-				}
+				changeSelection((controls.UI_UP ? -shiftMult : shiftMult));
+				changeDiff();
 			}
 		}
 		

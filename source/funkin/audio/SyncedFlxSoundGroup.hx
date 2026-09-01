@@ -75,6 +75,12 @@ class SyncedFlxSoundGroup extends FlxTypedGroup<FlxSound>
 		return snd;
 	}
 	
+	// if vocals are shorter than inst, game doesnt bug out and get stuck in a cycle of looping the vocals over and over and over and...
+	public inline function checkLength(snd:FlxSound):Bool
+	{
+		return (snd.time < songLength && snd.length <= songLength && snd.playing);
+	}
+	
 	/**
 	 * Culls through the group to find the largest desync value
 	 * @param baseTime The reference to compare difference to. Defaults to the groups first instance's time
@@ -85,8 +91,11 @@ class SyncedFlxSoundGroup extends FlxTypedGroup<FlxSound>
 		
 		var diff:Float = 0;
 		forEachAlive(snd -> {
-			final s = Math.abs(snd.time - time);
-			if (s > diff) diff = s; // get the highest difference
+			if (checkLength(snd))
+			{
+				final s = Math.abs(snd.time - time);
+				if (s > diff) diff = s; // get the highest difference
+			}
 		});
 		
 		return diff;
@@ -101,9 +110,12 @@ class SyncedFlxSoundGroup extends FlxTypedGroup<FlxSound>
 		final time = baseTime ?? getFirstAlive()?.time ?? 0.0;
 		
 		forEachAlive(snd -> {
-			snd.pause();
-			snd.time = time;
-			snd.play(false, time);
+			if (checkLength(snd))
+			{
+				snd.pause();
+				snd.time = time;
+				snd.play(false, time);
+			}
 		});
 	}
 	
@@ -280,8 +292,7 @@ class PlayableSong extends VocalGroup
 	override public function play(forceRestart:Bool = false, startTime:Float = 0.0, ?endTime:Null<Float>)
 	{
 		if (trackSwap && inst != null) inst.volume = 0;
-		if (endTime == null || endTime == 0)
-			endTime = songLength;
+		if (endTime == null || endTime == 0) endTime = songLength;
 		
 		super.play(forceRestart, startTime, endTime);
 	}
