@@ -19,6 +19,8 @@ class Project extends HXProject
 
 	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false"/>
 
+	<haxedef name="openfl_dpi_aware" if="windows"/>
+
 	<!-- ENGINE CONFIGS -->
 
 	<define name="MODS_ALLOWED" if="desktop"/>
