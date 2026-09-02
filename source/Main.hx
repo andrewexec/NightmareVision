@@ -21,6 +21,7 @@ class Main extends Sprite
 
 	public static var audioDisconnected:Bool = false;
 	public static var noTerminalColor:Bool = false;
+	public static var verbose:Bool = false;
 	
 	public static final startMeta =
 		{
@@ -32,10 +33,12 @@ class Main extends Sprite
 			initialState: funkin.states.TitleState
 		};
 		
+	@:dox(hide) public static function preInit():Void {}
+
 	static function __init__()
 	{
 		funkin.utils.MacroUtil.haxeVersionEnforcement();
-		
+
 		openfl.utils._internal.Log.level = openfl.utils._internal.Log.LogLevel.INFO;
 	}
 	
@@ -47,7 +50,9 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
-		
+
+		funkin.backend.system.Logs.init();
+
 		#if (CRASH_HANDLER && !debug)
 		funkin.backend.CrashHandler.init();
 		#end
