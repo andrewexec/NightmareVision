@@ -22,6 +22,7 @@ class Main extends Sprite
 	public static var audioDisconnected:Bool = false;
 	public static var noTerminalColor:Bool = false;
 	public static var verbose:Bool = false;
+	public static var forceGPUOnlyBitmapsOff:Bool = #if desktop false #else true #end;
 	
 	public static final startMeta =
 		{
